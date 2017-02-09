@@ -1,0 +1,17 @@
+﻿Build started 9/02/2017 11:59:04 AM.
+     1>Project "C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\covImageIntegral2\covImageIntegral2.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "x64\Release\covImageIntegral2.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         All outputs are up-to-date.
+       Link:
+         All outputs are up-to-date.
+         covImageIntegral2.vcxproj -> C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Release\covImageIntegral2.exe
+       FinalizeBuildStatus:
+         Deleting file "x64\Release\covImageIntegral2.unsuccessfulbuild".
+         Touching "x64\Release\covImageIntegral2.lastbuildstate".
+     1>Done Building Project "C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\covImageIntegral2\covImageIntegral2.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.04
