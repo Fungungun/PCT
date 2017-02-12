@@ -3,7 +3,7 @@ function showresults(file)
 clc
 warning('off')
 %-------------------------load data
-pf = fopen([file '_results.txt'],'r');
+pf = fopen([file '.txt'],'r');
 tline = fgetl(pf);
 str = strsplit(tline);
 file  = str{1};
@@ -45,7 +45,7 @@ nz	= strcat('%0',num2str(numzeros),'d');
 fext = 'jpg';
 for t=1:numFrame
     id=sprintf(nz,num(t));
-    s_frames{t} = strcat('./',file,'/',id,'.',fext);
+    s_frames{t} = strcat('../../videos/',file,'/',id,'.',fext);
     point_draw = calcpoint_draw(pos(t,:));
     imshow(s_frames{t}) 
     hold on

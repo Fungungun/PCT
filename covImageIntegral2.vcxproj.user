@@ -5,7 +5,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-i SuperMario -s 1 -e 300 -p 100 -t 2 -b  84   59   96  173</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-i David3     -s 1 -e 252 -p 100 -t 5 -b  83   200  118 331</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -149,14 +149,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="covImage.h" />
+    <ClInclude Include="cpp\INIReader.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="Cparticle.h" />
+    <ClInclude Include="ini.h" />
+    <ClInclude Include="SParater.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="covImage.cpp" />
     <ClCompile Include="Cparticle.cpp" />
+    <ClCompile Include="cpp\INIReader.cpp" />
     <ClCompile Include="debug.cpp" />
+    <ClCompile Include="ini.c" />
     <ClCompile Include="Test6.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>

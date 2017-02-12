@@ -23,7 +23,6 @@
 
 Mat Cparticle::par_pos;
 Mat Cparticle::par_weight;
-Mat Cparticle::stddevm;
 
 void Cparticle::calccovmat(CovImage &cim, vector<vector<int>> v, int nModes){
         if(nModes == 9){
@@ -45,11 +44,11 @@ void Cparticle::calc9covmat(CovImage &cim,vector<vector<int>> v){
 
      double *ptr = m_pos.ptr<double>(0);
      utils::getQuadrants(*(ptr), *(ptr+1), *(ptr+2), *(ptr+3), qx1, qy1, qx2, qy2);
-   //utils::getQuadrants((int)(ptr[0]+0.5), (int)(ptr[1]+0.5), (int)(ptr[2]+0.5), (int)(ptr[3]+0.5), qx1, qy1, qx2, qy2);
      for (int i=0; i < 4; i++) {
          cim.covComponentMatrices(qx1[i], qy1[i], qx2[i], qy2[i],
              IIprod[i], IIsum[i], Npixels[i]);
      }
+
      for(int i = 0; i < v.size() ; i++){
         Mat iiprod = Mat::zeros(IIprod[0].rows,IIprod[0].cols,CV_64F); 
         Mat iisum  =  Mat::zeros(IIsum[0].rows,IIsum[0].cols,CV_64F);
@@ -62,9 +61,11 @@ void Cparticle::calc9covmat(CovImage &cim,vector<vector<int>> v){
         m_cmat[i] = iiprod / (N-1) - iisum*iisum.t() / (N*(N-1));
      }
 }
+
 void Cparticle::calc3covmat(CovImage &cim, vector<vector<int>> v){
 
 }
+
 void Cparticle::logm(){
     for(int i = 0; i < 9;i++){
         Mat U, W, V;
@@ -89,6 +90,6 @@ void Cparticle::calcwt(Mat &par_wt,int k){
     double *pdis = distance.ptr<double>(0);
     double *pwt  = par_wt.ptr<double>(k);
     for(int i = 0 ; i < 9 ; i ++, pwt++, pdis++){
-        *pwt = 1/((*pdis)*(*pdis));       
+        *pwt = 1/(*pdis);       
     }
 }

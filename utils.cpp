@@ -8,6 +8,117 @@
 #include "utils.h"
 #include <fstream>
 
+void utils::InitPara(Parameter &para){
+    INIReader reader("config.ini");
+    if (reader.ParseError() < 0){
+        cerr<<"Config Failed!"<<endl;
+    }
+
+    para.file             = reader.Get("video_test","file","UNKNOWN");
+    para.fext             = reader.Get("video_test","fext","UNKNOWN");
+    para.route            = reader.Get("video_route","route","UNKNOWN");
+
+    para.x1               = reader.GetInteger(para.file,"x1",0);
+    para.y1               = reader.GetInteger(para.file,"y1",0);
+    para.x2               = reader.GetInteger(para.file,"x2",0);
+    para.y2               = reader.GetInteger(para.file,"y2",0);
+    para.startFrame       = reader.GetInteger(para.file,"startframe",1);
+    para.endFrame         = reader.GetInteger(para.file,"endframe",100);
+    para.nParticles       = reader.GetInteger(para.file,"nParticles",100);
+    para.nModes           = reader.GetInteger(para.file,"nModes",9);
+    para.dataset          = reader.GetInteger(para.file,"dataset",0);
+    para.gt_sep           = reader.GetInteger(para.file,"gt_sep",0);
+
+    para.std_x            = reader.GetReal(para.file,"std_x",1);
+    para.std_y            = reader.GetReal(para.file,"std_y",1);
+    para.std_gain_w       = reader.GetReal(para.file,"std_gain_w",0.1);
+    para.std_gain_h       = reader.GetReal(para.file,"std_gain_h",0.1);
+    para.diffratio        = reader.GetReal(para.file,"diffratio",0.1);
+
+    para.framelength      = para.endFrame - para.startFrame + 1;
+
+    para.v                = utils::CovmatQuadrantRef(para.nModes);
+    para.v_draw           = utils::ModeQuadrantRef(para.nModes);
+    para.tran_matrix      = utils::InitModeTranMat(para.nModes);
+
+    para.previousMode     = 0;
+    para.currentMode      = 0;
+}
+
+/* ------------------------------------------------------------ */
+
+Mat utils::InitModeTranMat(int nModes){
+    /*
+
+     1  2  3  4  5  6  7  8  9              1   2  3
+    1                                      1 
+    2                                      2
+    3                                      3
+    4
+    5
+    6
+    7
+    8
+    9
+    */  
+    if(nModes == 9){
+        Mat tran_matrix = (Mat_<double>(nModes,nModes)<<0.2 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,
+                                                        0.25,0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,
+                                                        0.25,0   ,0.25,0   ,0   ,0   ,0.25,0.25,0   ,
+                                                        0.25,0   ,0   ,0.25,0   ,0.25,0   ,0   ,0.25,
+                                                        0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,0.25,
+                                                        0.4 ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,0   ,
+                                                        0.4 ,0   ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,
+                                                        0.4 ,0.1 ,0.1 ,0   ,0   ,0   ,0   ,0.4 ,0   ,
+                                                        0.4 ,0   ,0   ,0.1 ,0.1 ,0   ,0   ,0   ,0.4  );
+    return tran_matrix;
+    }
+    
+}
+
+/* ------------------------------------------------------------ */
+
+Mat utils::load_pos_gt(Parameter para){
+
+    const int coorcnt = 4; //number of coordinates
+    Mat pos_gt    = Mat::zeros(para.framelength, coorcnt, CV_64F);
+
+    ifstream inf;
+    inf.open(para.route + para.file + "//gt.txt", ifstream::in);
+
+    char gt_sep;
+    if(para.gt_sep == 0){
+        gt_sep = ' ';
+    }
+    else if(para.gt_sep == 1){
+        gt_sep = ',';
+    }
+    else if(para.gt_sep == 2){
+        gt_sep = '\t';  //tab
+    }
+
+    string line;
+    size_t sep, sep2;
+    for(int i = 0; i < para.framelength; i++){
+        double *ppos_gt = pos_gt.ptr<double>(i);
+        getline(inf,line);
+        sep = line.find(gt_sep,0);
+        *(ppos_gt++) = atof(line.substr(0,sep).c_str()); 
+        for(int j = 0; sep < line.size() && j != coorcnt - 1 ; j++){
+            sep2 = line.find(gt_sep, sep + 1);
+            *(ppos_gt++) = atof(line.substr(sep+1,sep2-sep-1).c_str());
+            sep = sep2;
+        }
+    }
+
+    pos_gt.col(2) = pos_gt.col(0) + pos_gt.col(2);
+    pos_gt.col(3) = pos_gt.col(1) + pos_gt.col(3);
+
+    return pos_gt;
+}
+
+/* ------------------------------------------------------------ */
+
 void utils::getQuadrants(int x1, int y1, int x2, int y2,
     int *qx1, int *qy1, int *qx2, int *qy2)
 {
@@ -51,22 +162,19 @@ void utils::getHorizontalHalf(int x1, int y1, int x2, int y2,
 
 /* ------------------------------------------------------------ */
 
-void utils::GenImgName(string *filename, string file,int framelength, int dataset)
+void utils::GenImgName(vector<string> &filename, Parameter para)
 {
-    string fext = ".jpg";
-
-    for(int i = 0; i < framelength; i++){
+    for(int i = 0; i < para.framelength; i++){
         stringstream sstr; 
         sstr<<i+1;
         string frameNoStr;
         sstr>>frameNoStr;
         filename[i] = "00000000";
-        filename[i] += (frameNoStr+fext);
-        filename[i].assign(filename[i],filename[i].length() - (4*(dataset == 0)+8*(dataset == 1)+fext.length()),
-            (4*(dataset == 0)+8*(dataset == 1)+fext.length()));
-        filename[i] = ".//" + file + "//" + filename[i];
+        filename[i] += (frameNoStr+para.fext);
+        filename[i].assign(filename[i],filename[i].length() - (4*(para.dataset == 0)+8*(para.dataset == 1)+para.fext.length()),
+            (4*(para.dataset == 0)+8*(para.dataset == 1)+para.fext.length()));
+        filename[i] = para.route + para.file + "\\" + filename[i];
     }
-
 }
 
 /* ------------------------------------------------------------ */
@@ -77,6 +185,7 @@ Mat utils::GenParticlePostion(Mat meanm, Mat stddevm, int nParticles)
     double* pmean = meanm.ptr<double>(0);
     Mat ParPos    = Mat(nParticles,4,CV_64F);
     Mat ParPos_wh = Mat(nParticles,4,CV_64F); 
+
 
     Mat meanm_wh = Mat::zeros(1,4,CV_64F); 
     double * pmean_wh = meanm_wh.ptr<double>(0);
@@ -100,23 +209,35 @@ Mat utils::GenParticlePostion(Mat meanm, Mat stddevm, int nParticles)
 
 /* ------------------------------------------------------------ */
 
-void utils::normWt(Mat &par_wt, Mat sum_wt, int &finalmode){
-
+void utils::mode_tran(Mat &par_wt, Mat sum_wt, Parameter &para){
+    
     double sum_max = 0;
     double *psum = sum_wt.ptr<double>(0);
     for(int i = 0; i < sum_wt.cols ; i++, psum++){
         if(sum_max < *psum){
             sum_max = *psum;
-            finalmode = i;
+            para.currentMode = i;
         }
     }
-    for(int i = 0; i < par_wt.rows ; i++){
-        double *p = par_wt.ptr<double>(i);
-        double *psum = sum_wt.ptr<double>(0);
-        for(int j = 0; j < par_wt.cols; j++, p++, psum++){
-            *p /= *psum;
+
+    //control the best mode -- mode 1
+    double diff = abs(sum_wt.at<double>(0,0) - 
+        sum_wt.at<double>(0,para.currentMode))/sum_wt.at<double>(0,0);
+    cout<<"diff = "<<diff<<endl;
+    if( diff < para.diffratio){
+        para.currentMode = 0;
+    }
+
+    //finite state machine
+    if(para.currentMode != 0){
+        srand(getTickCount()); double probability = (double)rand()/RAND_MAX;
+        if(probability > para.tran_matrix.at<double>(para.previousMode,para.currentMode)){
+            para.currentMode = para.previousMode;
         }
     }
+    
+    
+    para.previousMode = para.currentMode;
 }
 
 /* ------------------------------------------------------------ */
@@ -142,49 +263,49 @@ vector<vector<int>> utils::CovmatQuadrantRef(int nmodes){
 
 /* ------------------------------------------------------------ */
 
-Mat utils::SearchParticle(CovImage covimg, Cparticle tarpar, int nParticles, int nModes, vector<vector<int>> v,int &mode){
+Mat utils::SearchParticle(CovImage covimg, Cparticle tarpar, Parameter &para, Mat pos_gt){
 
-    Cparticle::par_pos = utils::GenParticlePostion(tarpar.m_pos,Cparticle::stddevm,nParticles);
-    Cparticle::par_weight = Mat(nParticles,nModes,CV_64F);
+    Mat stddevm = Mat::zeros(1,4,CV_64F);
+    utils::updateStddev(stddevm, para, tarpar.m_pos);
+    cout<<"stddev = "<<stddevm<<endl;
 
-    Mat sum_wt = Mat::zeros(1,nModes,CV_64F); 
-    Mat max_wt = Mat::zeros(1,nModes,CV_64F);
-    Mat max_index = Mat::zeros(1,nModes,CV_64F);
-    for(int j = 0; j < nParticles; j++){
-        Cparticle canpar(covimg,Cparticle::par_pos.row(j),v);
+    Cparticle::par_pos = utils::GenParticlePostion(tarpar.m_pos, stddevm, para.nParticles);
+    Cparticle::par_weight = Mat::zeros(para.nParticles, para.nModes,CV_64F);
+
+    Mat sum_wt    = Mat::zeros(1, para.nModes,CV_64F); 
+    Mat max_wt    = Mat::zeros(1, para.nModes,CV_64F);
+    Mat max_index = Mat::zeros(1, para.nModes,CV_64F);
+
+    for(int j = 0; j < para.nParticles; j++){
+        Cparticle canpar(covimg,Cparticle::par_pos.row(j),para.v);
         canpar.calcdis(tarpar);
         canpar.calcwt(Cparticle::par_weight,j);
-        sum_wt += Cparticle::par_weight.row(j);
+        sum_wt += Cparticle::par_weight.row(j); 
         double *p          = Cparticle::par_weight.ptr<double>(j);
         double *pmax       = max_wt.ptr<double>(0);
         double *pmax_index = max_index.ptr<double>(0);
-        for(int i = 0; i < nModes ; i++,p++, pmax++, pmax_index++){
+        for(int i = 0; i < para.nModes ; i++,p++, pmax++, pmax_index++){
             if (*pmax < *p){
-
                 *pmax = *p;*pmax_index = j;
             }
         }
     }
-    utils::normWt(Cparticle::par_weight, sum_wt, mode);
-    cout<<"mode = " <<mode+1<< " max_index = "<<max_index.at<double>(0,mode)<<"  ";
-    Mat final_pos = Cparticle::par_pos.row(max_index.at<double>(0,mode));
-    cout<<" final_pos = "<<final_pos<<endl;
-    // Mat final_pos = Cparticle::par_weight.col(0).t() * Cparticle::par_pos;
+    utils::mode_tran(Cparticle::par_weight, sum_wt, para);
+   
+    
 
+    cout<<"mode = " <<para.currentMode+1<<endl;
+    Mat final_pos = Cparticle::par_pos.row(max_index.at<double>(0,para.currentMode));
+    cout<<" final_pos = "<<final_pos<<endl;
     return final_pos;
 }
 
 /* ------------------------------------------------------------ */
 
-void utils::ShowResults(CovImage covimg, string filename , Mat final_pos, string file, int nParticles, int mode, vector<vector<int>> v_draw){
-
-
+void utils::ShowResults(CovImage covimg, string filename ,  Mat final_pos, Parameter &para){
 
     stringstream ss;
-    //     ss<<filename;
-    //     putText(covimg.im,ss.str(),Point(5,20),CV_FONT_NORMAL,0.7,Scalar(0,0,255)); 
-    //     ss.str("");
-    ss<<"mode :"<<mode+1;
+    ss<<"mode :"<<para.currentMode+1;
     putText(covimg.im,ss.str(),Point(5,15),CV_FONT_NORMAL,0.7,Scalar(0,0,255)); 
     /*
     show all the particles
@@ -193,21 +314,13 @@ void utils::ShowResults(CovImage covimg, string filename , Mat final_pos, string
     //         double *p =  Cparticle::par_pos.ptr<double>(i);
     //         Point a = Point(*p,*(p+1));
     //         Point b = Point(*(p+2),*(p+3));
-    //         rectangle(covimg.im,a,b,Scalar(255,255,255));
+    //         rectangle(covimg.im,a,b,Scalar(255,i,i));
     //     }
-    /*
-    show the weighted sum of particles' positions
-    */
-    //     double *pfinal_pos = final_pos.ptr<double>(0);
-    //     Point a = Point(*pfinal_pos,*(pfinal_pos+1));
-    //     Point b = Point(*(pfinal_pos+2),*(pfinal_pos+3));
-    //     rectangle(covimg.im,a,b,Scalar(255,0,0));
-
     /*
     show mode
     */
     vector<Point> point_draw;
-    if(v_draw.size() == 9){
+    if(para.v_draw.size() == 9){
         point_draw.resize(9);
         double *pfinal_pos = final_pos.ptr<double>(0);
         double x1 = *pfinal_pos;double y1 = *(pfinal_pos+1);
@@ -216,16 +329,18 @@ void utils::ShowResults(CovImage covimg, string filename , Mat final_pos, string
         point_draw[0] = Point(x1,y1);   point_draw[1] = Point(xhalf,y1);   point_draw[2] = Point(x2,y1);
         point_draw[3] = Point(x1,yhalf);point_draw[4] = Point(xhalf,yhalf);point_draw[5] = Point(x2,yhalf);
         point_draw[6] = Point(x1,y2);   point_draw[7] = Point(xhalf,y2);   point_draw[8] = Point(x2,y2);
-
-        for(int i = 0; i < v_draw[mode].size() - 1; i++){
-            line(covimg.im, point_draw[v_draw[mode][i]],point_draw[v_draw[mode][i+1]],Scalar(255,255,255));
+        for(int i = 0; i < para.v_draw[para.currentMode].size() - 1; i++){
+            line(covimg.im, 
+                 point_draw[para.v_draw[para.currentMode][i]],
+                 point_draw[para.v_draw[para.currentMode][i+1]],
+                 Scalar(255,255,255));
         }
     }
-    else if(v_draw.size() == 3){}
-
-    imshow(file,covimg.im);
+    else if(para.v_draw.size() == 3){}
+    imshow(para.file,covimg.im);
     waitKey(1);
 }
+
 /*  draw mode
 points definition
 0------1------2
@@ -252,4 +367,16 @@ vector<vector<int>> utils::ModeQuadrantRef(int nmodes){
     }
     else if(nmodes == 3){}
     return v;
+}
+
+
+/* ------------------------------------------------------------ */
+void utils::updateStddev(Mat &stddevm, Parameter &para, Mat tarpos ){
+
+    double *ptarpos = tarpos.ptr<double>(0);
+    double width    = *(ptarpos+2) - *ptarpos;
+    double height   = *(ptarpos+3) - *(ptarpos+1);
+    stddevm = (Mat_<double>(1,4)<<para.std_x, para.std_y, 
+        para.std_gain_w*width/3 , para.std_gain_h*height/3);
+
 }

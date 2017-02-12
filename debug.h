@@ -35,6 +35,7 @@ namespace debug {
     /** return the content of a double image at the specified channel */
     Mat extractDoubleMat(Mat mat, int channel);
 
+    
 }
 
 #endif
