@@ -59,6 +59,8 @@ for t=1:numFrame
    pause(0.01)
 end
 
+
+close all
 end
 
 function point = calcpoint_draw(pos)

@@ -62,15 +62,16 @@ Mat utils::InitModeTranMat(int nModes){
     9
     */  
     if(nModes == 9){
-        Mat tran_matrix = (Mat_<double>(nModes,nModes)<<0.2 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,0.1 ,
-                                                        0.25,0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,
-                                                        0.25,0   ,0.25,0   ,0   ,0   ,0.25,0.25,0   ,
-                                                        0.25,0   ,0   ,0.25,0   ,0.25,0   ,0   ,0.25,
-                                                        0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,0.25,
-                                                        0.4 ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,0   ,
-                                                        0.4 ,0   ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,
-                                                        0.4 ,0.1 ,0.1 ,0   ,0   ,0   ,0   ,0.4 ,0   ,
-                                                        0.4 ,0   ,0   ,0.1 ,0.1 ,0   ,0   ,0   ,0.4  );
+        Mat tran_matrix = (Mat_<double>(nModes,nModes)<<
+            0.8 ,0.025,0.025,0.025,0.025,0.025,0.025,0.025,0.025,
+            0.25,0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,
+            0.25,0   ,0.25,0   ,0   ,0   ,0.25,0.25,0   ,
+            0.25,0   ,0   ,0.25,0   ,0.25,0   ,0   ,0.25,
+            0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,0.25,
+            0.4 ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,0   ,
+            0.4 ,0   ,0.1 ,0   ,0.1 ,0   ,0.4 ,0   ,0   ,
+            0.4 ,0.1 ,0.1 ,0   ,0   ,0   ,0   ,0.4 ,0   ,
+            0.4 ,0   ,0   ,0.1 ,0.1 ,0   ,0   ,0   ,0.4  );
     return tran_matrix;
     }
     
@@ -229,7 +230,7 @@ void utils::mode_tran(Mat &par_wt, Mat sum_wt, Parameter &para){
     }
 
     //finite state machine
-    if(para.currentMode != 0){
+    if(para.previousMode != 0){
         srand(getTickCount()); double probability = (double)rand()/RAND_MAX;
         if(probability > para.tran_matrix.at<double>(para.previousMode,para.currentMode)){
             para.currentMode = para.previousMode;

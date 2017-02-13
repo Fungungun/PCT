@@ -1,13 +1,6 @@
 video_sequence = {
-'Woman'
-'Skating'
-'Spiderman'
+'David3'
 'surfing'
-'girl_vot'
-'basketball'
-'Girl'
-'car4'
-'Tiger1'
 'FaceOcc1'
 };
 
