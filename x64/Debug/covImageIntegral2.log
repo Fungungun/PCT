@@ -1,31 +1,10 @@
-﻿Build started 13/02/2017 9:38:48 AM.
+﻿Build started 14/02/2017 4:22:53 PM.
      1>Project "C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\covImageIntegral2\covImageIntegral2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Debug\covImageIntegral2.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /Gd /TP /errorReport:prompt utils.cpp
-         utils.cpp
-     1>utils.cpp(234): warning C4244: 'argument' : conversion from 'int64' to 'unsigned int', possible loss of data
-     1>utils.cpp(299): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(330): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(331): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>utils.cpp(332): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
-     1>c:\users\21558188\desktop\phd\code\vs\covimageintegral2\covimageintegral2\utils.cpp(78): warning C4715: 'utils::InitModeTranMat' : not all control paths return a value
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /Od /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Debug\\" /Fd"x64\Debug\vc100.pdb" /Gd /TP /errorReport:prompt Test6.cpp
+         Test6.cpp
          All outputs are up-to-date.
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Debug\covImageIntegral2.exe" /INCREMENTAL:NO /NOLOGO opencv_calib3d2410d.lib opencv_contrib2410d.lib opencv_core2410d.lib opencv_features2d2410d.lib opencv_flann2410d.lib opencv_gpu2410d.lib opencv_highgui2410d.lib opencv_imgproc2410d.lib opencv_legacy2410d.lib opencv_ml2410d.lib opencv_nonfree2410d.lib opencv_objdetect2410d.lib opencv_ocl2410d.lib opencv_photo2410d.lib opencv_stitching2410d.lib opencv_superres2410d.lib opencv_ts2410d.lib opencv_video2410d.lib opencv_videostab2410d.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Debug\covImageIntegral2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Debug\covImageIntegral2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Debug\covImageIntegral2.lib" /MACHINE:X64 x64\Debug\covImage.obj
@@ -45,4 +24,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.36
+Time Elapsed 00:00:01.30

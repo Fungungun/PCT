@@ -21,6 +21,17 @@ Chenghuan Liu , Du Huynh, Jan 2017.
 #include "Cparticle.h"
 #include "SParater.h"
 
+#define ERROR_OUT__ std::cerr<<"[ERROR][File:"<<__FILE__<<"][Line:"<<__LINE__<<"]"
+
+#ifndef _DEBUG
+#define TB__(A) int64 A; A = cv::getTickCount()
+#define TE__(A) std::cout << #A << " : " << 1.E3 * double(cv::getTickCount() - A)/double(cv::getTickFrequency()) << "ms" << std::endl
+#else
+#define TB__(A)
+#define TE__(A)
+#endif
+
+
 
 using namespace std;
 using namespace cv;
@@ -62,8 +73,9 @@ int main( int argc, char** argv )
     //tracking start
     for(int i = para.startFrame; i < para.endFrame ; i++){
         //load new frame 
-        covimg.im = imread(filename[i],-1);
-        covimg.process(); 
+        Mat im_rgb = imread(filename[i],-1);
+        cvtColor(im_rgb,covimg.im,CV_BGR2Lab);
+        covimg.process();
         cout<<filename[i]<<endl;
 
         //search

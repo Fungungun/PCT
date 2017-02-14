@@ -78,7 +78,8 @@ class CovImage {
      */
     CovImage(string filename) {
    //     cerr << "constructor 1\n";
-        im = imread(filename, -1);
+        Mat im_rgb = imread(filename, -1);
+        cvtColor(im_rgb,im,CV_BGR2Lab);
         process();
     }
 
@@ -193,6 +194,7 @@ class CovImage {
     void gradient2Y(int channel);
 
     void computeIntegralImage();
+
 
  public:
     /* return the total from 1 to S inclusive */

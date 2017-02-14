@@ -1,6 +1,6 @@
 /*
- * Chenghuan Liu, Du Huynh, Jan 2017.
- */
+* Chenghuan Liu, Du Huynh, Jan 2017.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,10 +57,12 @@ void CovImage::coordinateY()
 
 void CovImage::intensity(int channel)
 {
-    uchar *inptr;
+   // uchar *inptr;
+    double *inptr;
     double *outptr;
-    for (int r=0; r < nRows; r++) {
-        inptr = (uchar *)im.ptr<uchar>(r) + channel;
+    for(int r=0; r < nRows; r++){
+       // inptr = (uchar *)im.ptr<uchar>(r) + channel;
+        inptr = (double *)im.ptr<double>(r) + channel;
         outptr = (double *)featimage.ptr<double>(r) + channel + 2;
         for (int c=0; c < nCols; c++, inptr += nChannels, outptr += dim){
             *outptr = (double)(*inptr);
@@ -84,7 +86,7 @@ void CovImage::gradientX(int channel)
         inptr += dim; outptr += dim;
         for (int c=1; c < nCols-1; c++, inptr += dim, outptr += dim){
             *outptr = (*(inptr+dim) - *(inptr-dim)) / 2.0;
-		}
+        }
         // the Ix value at the last column is the same as the previous column
         *outptr = *(outptr-dim);
     }
@@ -105,21 +107,21 @@ void CovImage::gradientY(int channel)
         outptr = (double *)featimage.ptr<double>(r) + offset + nChannels*2;
         for (int c=0; c < nCols; c++, inptr1 += dim, inptr2 += dim, outptr += dim){
             *outptr = *inptr2 - *inptr1;
-		}
+        }
     }
     // set row 0 the same as row 1
     outptr = (double *)featimage.ptr<double>(1) + offset + nChannels*2;
     double *outptr2 = (double *)featimage.ptr<double>(0) + offset + nChannels*2;
     for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
         *outptr2 = *outptr;
-	}
-    
+    }
+
     // set the last row the same as the second last row
     outptr = (double *)featimage.ptr<double>(nRows-2) + offset + nChannels*2;
     outptr2 = (double *)featimage.ptr<double>(nRows-1) + offset + nChannels*2;
     for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
         *outptr2 = *outptr;
-	}
+    }
 }
 
 /* ------------------------------------------------------------ */
@@ -127,54 +129,54 @@ void CovImage::gradientY(int channel)
 void CovImage::gradient2X(int channel)
 {
     double *inptr;  // pointing to intensity of the channel
-	double *outptr; // pointing to gradient-x of the channel
-	int offset = channel + 2;
-	for(int r=0; r < nRows; r++) {
-		inptr = (double *)featimage.ptr<double>(r) + offset;
-		outptr = (double *)featimage.ptr<double>(r) + nChannels*3 + offset;
-		// set the Ix value at column 0 the same as column 1
-		*outptr = (*(inptr+2*dim) - 2*(*(inptr+dim)) + *inptr) / 1.0;
-		inptr += dim; outptr += dim;
-		for (int c=1; c < nCols-1; c++, inptr += dim, outptr += dim){
-			*outptr = (*(inptr+dim) - 2 * (*inptr) + *(inptr-dim)) / 1.0;
-		}
-		// the Ix value at the last column is the same as the previous column
-		*outptr = *(outptr-dim);
-	}
+    double *outptr; // pointing to gradient-x of the channel
+    int offset = channel + 2;
+    for(int r=0; r < nRows; r++) {
+        inptr = (double *)featimage.ptr<double>(r) + offset;
+        outptr = (double *)featimage.ptr<double>(r) + nChannels*3 + offset;
+        // set the Ix value at column 0 the same as column 1
+        *outptr = (*(inptr+2*dim) - 2*(*(inptr+dim)) + *inptr) / 1.0;
+        inptr += dim; outptr += dim;
+        for (int c=1; c < nCols-1; c++, inptr += dim, outptr += dim){
+            *outptr = (*(inptr+dim) - 2 * (*inptr) + *(inptr-dim)) / 1.0;
+        }
+        // the Ix value at the last column is the same as the previous column
+        *outptr = *(outptr-dim);
+    }
 }
 
 /* ------------------------------------------------------------ */
 
 void CovImage::gradient2Y(int channel)
 {
-	double *inptr1;   // pointing to intensity of the channel
-	double *inptr2;
-	double *inptr3;
-	double *outptr;  // pointing to gradient-y of the channel
+    double *inptr1;   // pointing to intensity of the channel
+    double *inptr2;
+    double *inptr3;
+    double *outptr;  // pointing to gradient-y of the channel
 
-	int offset = channel + 2;
-	for (int r = 1; r < nRows-1; r++) {
-		inptr1 = (double *)featimage.ptr<double>(r-1) + offset;
-		inptr2 = (double *)featimage.ptr<double>(r+1) + offset;
-		inptr3 = (double *)featimage.ptr<double>(r) + offset;
-		outptr = (double *)featimage.ptr<double>(r) + offset + nChannels*4;
-		for (int c=0; c < nCols; c++, inptr1 += dim, inptr2 += dim, outptr += dim){
-			*outptr = *inptr2 + *inptr1 - 2*(*inptr3);
-		}
-	}
-	// set row 0 the same as row 1
-	outptr = (double *)featimage.ptr<double>(1) + offset + nChannels*4;
-	double *outptr2 = (double *)featimage.ptr<double>(0) + offset + nChannels*4;
-	for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
-		*outptr2 = *outptr;
-	}
+    int offset = channel + 2;
+    for (int r = 1; r < nRows-1; r++) {
+        inptr1 = (double *)featimage.ptr<double>(r-1) + offset;
+        inptr2 = (double *)featimage.ptr<double>(r+1) + offset;
+        inptr3 = (double *)featimage.ptr<double>(r) + offset;
+        outptr = (double *)featimage.ptr<double>(r) + offset + nChannels*4;
+        for (int c=0; c < nCols; c++, inptr1 += dim, inptr2 += dim, outptr += dim){
+            *outptr = *inptr2 + *inptr1 - 2*(*inptr3);
+        }
+    }
+    // set row 0 the same as row 1
+    outptr = (double *)featimage.ptr<double>(1) + offset + nChannels*4;
+    double *outptr2 = (double *)featimage.ptr<double>(0) + offset + nChannels*4;
+    for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
+        *outptr2 = *outptr;
+    }
 
-	// set the last row the same as the second last row
-	outptr = (double *)featimage.ptr<double>(nRows-2) + offset + nChannels*4;
-	outptr2 = (double *)featimage.ptr<double>(nRows-1) + offset + nChannels*4;
-	for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
-		*outptr2 = *outptr;
-	}
+    // set the last row the same as the second last row
+    outptr = (double *)featimage.ptr<double>(nRows-2) + offset + nChannels*4;
+    outptr2 = (double *)featimage.ptr<double>(nRows-1) + offset + nChannels*4;
+    for (int c=0; c < nCols; c++, outptr += dim, outptr2 += dim){
+        *outptr2 = *outptr;
+    }
 }
 
 /* ------------------------------------------------------------ */
@@ -215,8 +217,8 @@ void CovImage::computeIntegralImage()
     }
 
     /* IIsum is a copy of featimage with an extra row of 0 at the top and extra
-     * columns of 0 at the left. The #extra columns = dim
-     */
+    * columns of 0 at the left. The #extra columns = dim
+    */
     IIsum.row(0).setTo(0.0);
     IIsum.col(0).setTo(0.0);
     for (int r=1; r < nRows+1; r++) {
@@ -226,7 +228,7 @@ void CovImage::computeIntegralImage()
     }
 
     /* now compute the cumulative sum along the rows then along the columns
-     */
+    */
     for (int r=1; r < nRows+1; r++) {
         IIprod.row(r) += IIprod.row(r-1);
         IIsum.row(r) += IIsum.row(r-1);
@@ -235,7 +237,7 @@ void CovImage::computeIntegralImage()
         IIprod.col(c) += IIprod.col(c-1);
         IIsum.col(c) += IIsum.col(c-1);
     }
-	
+
 }
 /* ------------------------------------------------------------ */
 

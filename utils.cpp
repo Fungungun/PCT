@@ -221,7 +221,8 @@ void utils::mode_tran(Mat &par_wt, Mat sum_wt, Parameter &para){
         }
     }
 
-    //control the best mode -- mode 1
+    //when the difference between other modes and mode 1 are too small
+    //set it to mode 1
     double diff = abs(sum_wt.at<double>(0,0) - 
         sum_wt.at<double>(0,para.currentMode))/sum_wt.at<double>(0,0);
     cout<<"diff = "<<diff<<endl;
@@ -236,8 +237,6 @@ void utils::mode_tran(Mat &par_wt, Mat sum_wt, Parameter &para){
             para.currentMode = para.previousMode;
         }
     }
-    
-    
     para.previousMode = para.currentMode;
 }
 
@@ -292,8 +291,6 @@ Mat utils::SearchParticle(CovImage covimg, Cparticle tarpar, Parameter &para, Ma
         }
     }
     utils::mode_tran(Cparticle::par_weight, sum_wt, para);
-   
-    
 
     cout<<"mode = " <<para.currentMode+1<<endl;
     Mat final_pos = Cparticle::par_pos.row(max_index.at<double>(0,para.currentMode));
