@@ -14,6 +14,9 @@
 using namespace std;
 using namespace cv;
 
+
+
+
 namespace debug {
 
     /** return the uchar matrix from the reading of a small text file */

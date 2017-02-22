@@ -1,0 +1,33 @@
+
+--------------------------------------------------------------------
+
+12:19 PM 21/02/2017   
+format bank
+for i = 1 : 100
+    par_dis_m(i) = norm(canpar_model(:,:,i) - tarpar_model,'fro');
+end
+par_dis_m - par_dis(:,1)'
+
+the results are all zero which means the results in C are correct
+
+
+--------------------------------------------------------------------
+
+10:47 AM 22/02/2017
+
+img = double(imread('../../videos/car4/0001.jpg'));
+feamat = FeatureMatrix(img);
+target = feamat(51:138,70:177,:);
+target = reshape(target,[],7);
+tarpar_model
+cov(target) - tarpar_covmat
+logm(cov(target)) - logm(tarpar_covmat)
+(logm(cov(target)) - tarpar_model)
+
+ Inf           Inf          0.36          8.05          1.86          8.05          0.30
+
+*same feature matrix, different covariance matrices
+*logm has been tested to be right
+*the problem is within the function calccovmat
+*interpolation has been tested to be right 
+*problem solved. when loading ground truth from gt.txt the coordinates should minus 1 as the ground truth consider the first pixel (0,0)

@@ -4,91 +4,59 @@ Chenghuan Liu , Du Huynh, Jan 2017.
 
 */
 
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/opencv.hpp>
-#include <math.h>
-#include <time.h>
-#include <sstream>
-#include <string>
-#include <fstream>
-#include <omp.h>
-
-#include "covImage.h"
-#include "debug.h"
-#include "utils.h"
-#include "Cparticle.h"
-#include "SParater.h"
-
-#define ERROR_OUT__ std::cerr<<"[ERROR][File:"<<__FILE__<<"][Line:"<<__LINE__<<"]"
-
-#ifndef _DEBUG
-#define TB__(A) int64 A; A = cv::getTickCount()
-#define TE__(A) std::cout << #A << " : " << 1.E3 * double(cv::getTickCount() - A)/double(cv::getTickFrequency()) << "ms" << std::endl
-#else
-#define TB__(A)
-#define TE__(A)
-#endif
+#include "Test6.h"
 
 
-
-using namespace std;
-using namespace cv;
 
 int main( int argc, char** argv )
 {
-    //load parameters from config.ini
+    vector<string> video_list;
+    utils::LoadVideoList(video_list);
+
     Parameter para;
-    utils::InitPara(para);
+    for(int video_count = 0; video_count < video_list.size(); ++video_count){
+        //load parameters from config.ini
+        para.file = video_list[video_count];
+        utils::InitPara(para);
 
-    //initialization
-    vector<string> filename(para.framelength);
-    utils::GenImgName(filename,para);
+        //load ground truth of position
+        Mat pos_gt = utils::LoadPosGT(para);
+        para.nModes = utils::updateModeNum(pos_gt.row(para.startFrame-2));
 
-    //---------------------------//
-//     for(int i = 0; i < para.framelength ; i++){
-//         Mat img = imread(filename[i],-1);
-//         double *p =  pos_gt.ptr<double>(i);
-//         Point a = Point(*p,*(p+1));
-//         Point b = Point(*(p+2),*(p+3));
-//         rectangle(img,a,b,Scalar(0,0,0));
-//         imshow("flag",img);
-//         waitKey(100);
-//     }
-    //---------------------------//
+        //initialization
+        vector<string> filename(para.endFrame);
+        utils::GenImgName(filename,para);
 
-    //create target
-    CovImage covimg(filename[para.startFrame-1]);
-    Cparticle tarpar(covimg,para);
-
-    //write results to file
-    ofstream presults;
-    presults.open(".//results//" + para.file + ".txt");
-    presults<<para.file<<" "<<para.dataset<<endl;
-
-    //load ground truth of position
-    Mat pos_gt = utils::load_pos_gt(para);
-
-    //tracking start
-    for(int i = para.startFrame; i < para.endFrame ; i++){
-        //load new frame 
-        Mat im_rgb = imread(filename[i],-1);
-        cvtColor(im_rgb,covimg.im,CV_BGR2Lab);
-        covimg.process();
-        cout<<filename[i]<<endl;
-
-        //search
-        Mat final_pos = utils::SearchParticle(covimg,tarpar,para,pos_gt.row(i));
-
-        //position update
-         tarpar.m_pos = final_pos.clone();
-        
-        //show results 
-        utils::ShowResults(covimg,filename[i],tarpar.m_pos, para);
+        //create target with template library
+        Cparticle tarpar(filename,para,pos_gt);
 
         //write results to file
-        presults<<i+1<<" "<<para.currentMode+1<<" "<<tarpar.m_pos<<endl;
+        ofstream  presults;
+        presults.open(".//results//" + para.file + ".txt");
+        presults<<para.file<<" "<<para.dataset<<endl;
+
+        //tracking start
+        for(int i = para.startFrame - 1; i < para.endFrame ; ++i){
+            //load new frame 
+            CovImage covimg(filename[i]);
+            cout<<"Tracking Frame "<<i+1<<"..."<<endl;
+            //search
+            tarpar.m_pos = utils::SearchParticle(covimg,tarpar,para,pos_gt.row(i));
+            //model update
+            if(para.updateFreq != 0){
+                if(para.currentMode == 0 && i % para.updateFreq == 0){
+                    tarpar.updateModel(covimg,para);
+                }
+            }        
+            //show results 
+            utils::ShowResults(covimg,filename[i],tarpar.m_pos, para, pos_gt.row(i));
+            //write results to file
+            presults<<i+1<<" "<<para.currentMode+1<<" "<<tarpar.m_pos<<endl;
+        }
+        presults.close();
+        destroyAllWindows();
+        
     }
-    presults.close();
+    //system("shutdown -h");
+    
 }

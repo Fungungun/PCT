@@ -154,6 +154,7 @@
     <ClInclude Include="Cparticle.h" />
     <ClInclude Include="ini.h" />
     <ClInclude Include="SParater.h" />
+    <ClInclude Include="Test6.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,24 +1,20 @@
 #ifndef __COV_IMAGE_H__
 #define __COV_IMAGE_H__
-
-
 /*
  * Chenghuan, Du Huynh, Jan 2017.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <math.h>
 #include <opencv2/opencv.hpp>
 #include <time.h>
-
 #include <sstream>
 #include <string>
 #include <assert.h>
+
 #include "debug.h"
 
 /* feature dimension of single-channel and 3-channel images */
@@ -40,7 +36,9 @@ class CovImage {
 
  public:
     /* input image */
-    Mat im;       
+    Mat im_in;    
+    /*image in Lab space*/
+    Mat im;
     /* #channels of im */
     int nChannels;
     /* #rows of im */
@@ -77,9 +75,19 @@ class CovImage {
      *   filename - the name of the image file.
      */
     CovImage(string filename) {
-   //     cerr << "constructor 1\n";
-        Mat im_rgb = imread(filename, -1);
-        cvtColor(im_rgb,im,CV_BGR2Lab);
+        //cerr << "constructor 1\n";
+        //rgb -> CV_32F -> Lab -> CV_64F
+        im_in = imread(filename, -1);
+        if (im_in.channels() == 3){
+            Mat tmp;
+            im_in.convertTo(tmp,CV_32F);
+            tmp *= 1./255;
+            cvtColor(tmp,im,CV_BGR2Lab);
+            im.convertTo(im,CV_64F);
+        }
+        else{
+            im_in.convertTo(im,CV_64F);
+        }
         process();
     }
 
@@ -146,9 +154,9 @@ class CovImage {
 		
 // 		cerr << "coordinateX() done\n";
 // 		debug::printDoubleMat(featimage, 0);
-//         cerr << "coordinateY() done\n";
-//         debug::printDoubleMat(featimage, 1);
-		
+// 		cerr << "coordinateY() done\n";
+// 		debug::printDoubleMat(featimage, 1);
+				
 
         for (int c=0; c < nChannels; c++) {
             intensity(c);
@@ -157,16 +165,17 @@ class CovImage {
 			gradient2X(c); // channel 2+3*nChannels+c
 			gradient2Y(c); // channel 2+4*nChannels+c
 
-//             cerr << "intensity() channel " << c << " done\n";
-//             debug::printDoubleMat(featimage, 2+c);
-//             cerr << "gradientX() channel " << c << " done\n";
-//             debug::printDoubleMat(featimage, 2+nChannels+c);
+//          cerr << "intensity() channel " << c << " done\n";
+//          debug::printDoubleMat(featimage, 2+c);
+//          cerr << "gradientX() channel " << c << " done\n";
+//          debug::printDoubleMat(featimage, 2+nChannels+c);
 // 			cerr << "gradientY() channel " << c << " done\n";
 // 			debug::printDoubleMat(featimage, 2+2*nChannels+c);
 // 			cerr << "gradient2X() channel " << c << " done\n";
 // 			debug::printDoubleMat(featimage, 2+3*nChannels+c);
 // 			cerr << "gradient2Y() channel " << c << " done\n";
 // 			debug::printDoubleMat(featimage, 2+4*nChannels+c);	
+
         }
 
         computeIntegralImage();
@@ -275,8 +284,8 @@ class CovImage {
      * or
      *    prodM / (N-1) - sumM*sumM' / (N*(N-1))
      */
-//    void covComponentMatrices(int x1, int y1, int x2, int y2,
-//                              Mat &prodM, Mat &sumM, int &N);
+//     void covComponentMatrices(int x1, int y1, int x2, int y2,
+//         Mat &prodM, Mat &sumM, double &Npixels);
   
     
 

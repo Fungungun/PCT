@@ -6,9 +6,18 @@
 #include "SParater.h"
 #include "cpp/INIReader.h"
 
+#define Debug_ 0
+#pragma warning( disable : 4244)
+
 namespace utils {
 
     /*
+    .....
+    */
+    void LoadVideoList(vector<string> &video_list);
+
+    /*
+
     .....
     */
     void InitPara(Parameter &para);
@@ -22,8 +31,8 @@ namespace utils {
     return the ground truth of position
     */
 
-    Mat load_pos_gt(Parameter para);
-
+    Mat LoadPosGT(Parameter para);
+    
     /* Given the top-left and bottom-right corner coordinates of a image
     * region, this function returns the coordinates of the the four corners
     * of 4 quadrants.
@@ -63,7 +72,7 @@ namespace utils {
     /* 
         normalize the weight of particles
     */
-    void mode_tran(Mat &par_wt, Mat sum_wt, Parameter &para);
+    void ModeTran(Mat sum_wt, Parameter &para);
 
     /*  
      * generate different modes
@@ -73,12 +82,12 @@ namespace utils {
     /*
     ...
      */
-    Mat SearchParticle(CovImage covimg, Cparticle tarpar, Parameter &para, Mat pos_gt);
+    Mat SearchParticle(CovImage &covimg, Cparticle &tarpar, Parameter &para, Mat pos_gt);
 
     /*  
     ...
      */
-    void ShowResults(CovImage covimg, string filename , Mat final_pos, Parameter &para);
+    void ShowResults(CovImage covimg, string filename , Mat final_pos, Parameter &para, Mat pos_gt);
 
     /*  
     ...
@@ -95,6 +104,15 @@ namespace utils {
      */
     void updateStddev(Mat &stddev, Parameter &para, Mat tarpos);
 
+    /*
+    ...
+     */
+    bool IsParticleOutFrame(Mat single_par_pos);
+
+    /*
+    ...
+     */
+    int updateModeNum(Mat pos);
 };
 
 #endif

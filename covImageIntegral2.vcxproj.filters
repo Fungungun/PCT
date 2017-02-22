@@ -36,6 +36,9 @@
     <ClInclude Include="SParater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Test6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug.cpp">

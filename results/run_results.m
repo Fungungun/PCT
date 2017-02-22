@@ -1,6 +1,8 @@
 video_sequence = {
-'David3'
+'polarbear'
+'bolt'
 'surfing'
+'David3'
 'FaceOcc1'
 };
 

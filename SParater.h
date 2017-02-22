@@ -1,17 +1,19 @@
 #ifndef __COV_PARAMETER_H__
 #define __COV_PARAMETER_H__
 
+#include <fstream>
+
 struct Parameter{
     string file;
     string route;
     string fext;
 
-    int x1,y1,x2,y2; //(x1,y1)--top left (x2,y2)--bottom right
+    int templateNo;
     int startFrame,endFrame;
     int nParticles;
     int nModes;
-    int dataset; // 0 four digits   1 eight digits
-    int gt_sep; // 0 for space, 1 for comma
+    int dataset; 
+    int gt_sep; 
 
     double std_x;
     double std_y;
@@ -21,13 +23,20 @@ struct Parameter{
 
     int framelength;
 
-    //
-    vector<vector<int>>    v;
-    vector<vector<int>>    v_draw;
+    vector<vector<int>>    v9;
+    vector<vector<int>>    v3;
+    vector<vector<int>>    v_draw9;
+    vector<vector<int>>    v_draw3;
+    Mat                    tran_matrix9;
+    Mat                    tran_matrix3;
 
-    Mat tran_matrix;
     int previousMode;
     int currentMode;
+
+    int updateFreq;
+
 };
+
+
 
 #endif
