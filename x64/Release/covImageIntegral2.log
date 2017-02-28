@@ -1,4 +1,4 @@
-﻿Build started 22/02/2017 4:33:44 PM.
+﻿Build started 27/02/2017 7:52:13 PM.
      1>Project "C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\covImageIntegral2\covImageIntegral2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Release\covImageIntegral2.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -26,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.46
+Time Elapsed 00:00:03.57

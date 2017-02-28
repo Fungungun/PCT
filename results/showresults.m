@@ -1,4 +1,8 @@
-function showresults(file)
+function result = showresults(file,fps,wndsize)
+
+%file   : ball, surfing, david3 etc
+%fps    : 100,50,20 etc
+%wndsize: 100:100%(original) 200:twice bigger
 
 clc
 warning('off')
@@ -9,17 +13,42 @@ str = strsplit(tline);
 file  = str{1};
 dataset = str2num(str{2});
 i = 1;
+
 while ~feof(pf) 
    tline = fgetl(pf);
    str = strsplit(tline);
    num(i) = str2num(str{1});
    mode(i) = str2num(str{2});
    pos(i,1) = str2num(str{3}(2:end-1));
+   
    pos(i,2) = str2num(str{4}(1:end-1));
    pos(i,3) = str2num(str{5}(1:end-1));
    pos(i,4) = str2num(str{6}(1:end-2));
    i = i + 1;
 end
+fclose(pf);
+%-------------------------load groundtruth
+pf = fopen([file '_gt.txt'],'r');
+tline = fgetl(pf); % get rid of the first line
+i = 1;
+str = strsplit(tline,',');
+if length(str{1}) < length(tline)
+    gt_delimiter = ',';
+else
+    gt_delimiter = char(9);
+    str = strsplit(tline,gt_delimiter);
+end
+
+while ~feof(pf)
+    tline = fgetl(pf);
+    pos_gt(i,1) = str2num(str{1});
+    pos_gt(i,2) = str2num(str{2});
+    pos_gt(i,3) = str2num(str{3}) + str2num(str{1});
+    pos_gt(i,4) = str2num(str{4}) + str2num(str{2});
+    str = strsplit(tline,gt_delimiter);
+    i = i + 1;
+end
+fclose(pf);
 %---------------------------show image
 % 1------2------3
 % |      |      |
@@ -38,6 +67,13 @@ mode9_index = [
   1 3 6 4 1 3 6; %mode 9
 ];
 
+pos_wh    = [pos(:,1) pos(:,2) pos(:,3)-pos(:,1) pos(:,4)-pos(:,2)];
+pos_gt_wh = [pos_gt(:,1) pos_gt(:,2) pos_gt(:,3)-pos_gt(:,1) pos_gt(:,4)-pos_gt(:,2)];
+for i = 1:size(pos_wh,1)
+    iou(i) = bboxOverlapRatio(pos_wh(i,:),pos_gt_wh(i,:));
+end
+
+
 numzeros = (dataset == 0) * 4 + (dataset == 1) * 8;
 numFrame = length(num);
 s_frames = cell(numFrame,1);
@@ -47,19 +83,26 @@ for t=1:numFrame
     id=sprintf(nz,num(t));
     s_frames{t} = strcat('../../videos/',file,'/',id,'.',fext);
     point_draw = calcpoint_draw(pos(t,:));
-    imshow(s_frames{t}) 
+    %image
+    imshow(s_frames{t},'InitialMagnification',wndsize); 
     hold on
+    %groud truth
+    rectangle('Position',pos_gt_wh(t,:),'LineWidth',10);
+    %text
     index = mode9_index(mode(t),:);
-    text(20,20,['mode: ' num2str(mode(t))],'FontSize',14,'Color','red')
+    text(20,20,['frame ' num2str(t) '  IOU score ' num2str(iou(t)) '  mode ' num2str(mode(t))], ... 
+                'FontSize',14,'Color','red')
     for i = 1:6
         x = [point_draw(index(i),1),point_draw(index(i+1),1)];
         y = [point_draw(index(i),2),point_draw(index(i+1),2)];
-        plot(x,y,'r-')
+        plot(x,y,'w-','LineWidth',10)
     end
-   pause(0.01)
+   pause(1/fps)
+   cla
 end
-
-
+result.numFrame = numFrame;
+result.sumiou = sum(iou);
+result.sumiou/result.numFrame
 close all
 end
 

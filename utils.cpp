@@ -24,7 +24,7 @@ void utils::InitPara(Parameter &para){
     cerr<<"Loading parameters...";
     INIReader reader("config.ini");
     if (reader.ParseError() < 0){
-       ERROR_OUT__;
+        ERROR_OUT__;
     }
     para.fext             = reader.Get("video_type","fext","UNKNOWN");
     para.route            = reader.Get("video_route","route","UNKNOWN");
@@ -33,7 +33,6 @@ void utils::InitPara(Parameter &para){
     para.endFrame         = reader.GetInteger(para.file,"endframe",100);
     para.nParticles       = reader.GetInteger(para.file,"nParticles",100);
     para.dataset          = reader.GetInteger(para.file,"dataset",0);
-    para.gt_sep           = reader.GetInteger(para.file,"gt_sep",0);
     para.std_x            = reader.GetReal(para.file,"std_x",1);
     para.std_y            = reader.GetReal(para.file,"std_y",1);
     para.std_gain_w       = reader.GetReal(para.file,"std_gain_w",0.1);
@@ -78,7 +77,7 @@ Mat utils::InitModeTranMat(int nModes){
 
     if(nModes == 9){
         Mat tran_matrix = (Mat_<double>(nModes,nModes)<<
-            0.2 ,0.15,0.15,0.15,0.15,0.05,0.05,0.05,0.05,
+            0.25,0.2 ,0.2 ,0.2 ,0.2 ,0.05,0.05,0.05,0.05,
             0.25,0.25,0   ,0   ,0   ,0.25,0   ,0.25,0   ,
             0.25,0   ,0.25,0   ,0   ,0   ,0.25,0.25,0   ,
             0.25,0   ,0   ,0.25,0   ,0.25,0   ,0   ,0.25,
@@ -111,21 +110,14 @@ Mat utils::LoadPosGT(Parameter para){
     if(inf == NULL) ERROR_OUT__;
 
     char gt_sep;
-    if(para.gt_sep == 0){
-        gt_sep = ' ';
-    }
-    else if(para.gt_sep == 1){
-        gt_sep = ',';
-    }
-    else if(para.gt_sep == 2){
-        gt_sep = '\t';  //tab
-    }
+
 
     string line;
     size_t sep, sep2;
+    getline(inf,line);
+    gt_sep = line.find(',') > line.length() ? '\t' : ',';
     for(int i = 0; i < para.endFrame; i++){
         double *ppos_gt = pos_gt.ptr<double>(i);
-        getline(inf,line);
         sep = line.find(gt_sep,0);
         *(ppos_gt++) = atof(line.substr(0,sep).c_str()); 
         for(int j = 0; sep < line.size() && j != coorcnt - 1 ; j++){
@@ -133,10 +125,11 @@ Mat utils::LoadPosGT(Parameter para){
             *(ppos_gt++) = atof(line.substr(sep+1,sep2-sep-1).c_str());
             sep = sep2;
         }
+        getline(inf,line);
     }
     pos_gt.col(2) = pos_gt.col(0) + pos_gt.col(2);
     pos_gt.col(3) = pos_gt.col(1) + pos_gt.col(3);
-    pos_gt -= 1;
+    pos_gt -= 1; // index starts from 0
 
     cerr<<"Done!"<<endl;
     return pos_gt;
@@ -145,7 +138,7 @@ Mat utils::LoadPosGT(Parameter para){
 /* ------------------------------------------------------------ */
 
 void utils::getQuadrants(int x1, int y1, int x2, int y2,
-     int *qx1, int *qy1, int *qx2, int *qy2)
+    int *qx1, int *qy1, int *qx2, int *qy2)
 {
     int xhalf = (x1+x2) / 2;
     int yhalf = (y1+y2) / 2;
@@ -181,9 +174,9 @@ void utils::getHorizontalHalf(int x1, int y1, int x2, int y2,
     int xhalf = (x1+x2) / 2;
 
     // left half
-     qx1[0] = x1;  qy1[0] = y1;  qx2[0] = xhalf;  qy2[0] = y2;
+    qx1[0] = x1;  qy1[0] = y1;  qx2[0] = xhalf;  qy2[0] = y2;
     // right half
-     qx1[0] = xhalf+1;  qy1[0] = y1;  qx2[0] = x2;  qy2[0] = y2;
+    qx1[0] = xhalf+1;  qy1[0] = y1;  qx2[0] = x2;  qy2[0] = y2;
 }
 
 /* ------------------------------------------------------------ */
@@ -207,50 +200,20 @@ void utils::GenImgName(vector<string> &filename, Parameter para){
 
 /* ------------------------------------------------------------ */
 
-Mat utils::GenParticlePostion(Mat meanm, Mat stddevm, int nParticles)
-{
-    double* pstddev = stddevm.ptr<double>(0);
-    double* pmean = meanm.ptr<double>(0);
-    Mat ParPos    = Mat(nParticles,4,CV_64F);
-    Mat ParPos_wh = Mat(nParticles,4,CV_64F); 
-
-
-    Mat meanm_wh = Mat::zeros(1,4,CV_64F); 
-    double * pmean_wh = meanm_wh.ptr<double>(0);
-    *(pmean_wh)      = *(pmean);
-    *(pmean_wh + 1)  = *(pmean + 1);
-    *(pmean_wh + 2)  = *(pmean + 2) - *(pmean);
-    *(pmean_wh + 3)  = *(pmean + 3) - *(pmean + 1);
-
-    for(int i = 0; i < 4; ++i, ++pmean_wh, ++pstddev)
-    {
-        theRNG().state = getTickCount();
-        randn(ParPos_wh.col(i),(double)(*pmean_wh),(double)(*pstddev));
-    }
-    ParPos.col(0) = ParPos_wh.col(0) * 1.0;
-    ParPos.col(1) = ParPos_wh.col(1) * 1.0;
-    ParPos.col(2) = ParPos_wh.col(2) + ParPos_wh.col(0);
-    ParPos.col(3) = ParPos_wh.col(3) + ParPos_wh.col(1);
-
-    return ParPos;
-}
-
-/* ------------------------------------------------------------ */
-
-void utils::ModeTran(Mat sum_dis, Parameter &para){
+void utils::ModeTran(Parameter &para){
     //finite state machine
     double *ptran_matrix = para.nModes == 9 ? 
-        para.tran_matrix9.ptr<double>(para.previousMode):para.tran_matrix3.ptr<double>(para.previousMode) ;
-    double *psum         = sum_dis.ptr<double>(0);
-    for(int i = 0; i < sum_dis.cols; ++i, ++psum, ++ptran_matrix){
-        *psum  /= (*ptran_matrix+0.001);
-    }
-    psum = sum_dis.ptr<double>(0);
-
-    double sum_min = 0;
-    for(int i = 0; i < sum_dis.cols ; ++i, ++psum){
-        if(sum_min > *psum){
-            sum_min = *psum;
+        para.tran_matrix9.ptr<double>(para.previousMode):para.tran_matrix3.ptr<double>(para.previousMode);
+    Mat weighted_sum_prob = Cparticle::sum_prob.clone();
+    double *psum         = weighted_sum_prob.ptr<double>(0);
+    for(int i = 0; i < weighted_sum_prob.cols; ++i, ++psum, ++ptran_matrix)
+          *psum  *=  *ptran_matrix;
+    //cout<<weighted_sum_prob<<endl;
+    psum = weighted_sum_prob.ptr<double>(0);
+    double sum_max = 0;
+    for(int i = 0; i < weighted_sum_prob.cols; ++i, ++psum){
+        if(sum_max < *psum){
+            sum_max = *psum;
             para.currentMode = i;
         }
     }
@@ -286,65 +249,42 @@ vector<vector<int>> utils::CovmatQuadrantRef(int nmodes){
 /* ------------------------------------------------------------ */
 
 Mat utils::SearchParticle(CovImage &covimg, Cparticle &tarpar, Parameter &para, Mat pos_gt){
-//     ofstream ptestfile;
-//     ptestfile.open(".//experiments&results//test_metric_dis_data.m",ios::trunc);
-    //update standard deviation
-    Mat stddevm = Mat::zeros(1,4,CV_64F);
-    utils::updateStddev(stddevm, para, tarpar.m_pos);
-    Cparticle::par_pos = utils::GenParticlePostion(tarpar.m_pos, stddevm, para.nParticles);
-    Cparticle::par_dis = Mat::zeros(para.nParticles, para.nModes,CV_64F);
-
-    Mat sum_dis  =  Mat::zeros(1, para.nModes,CV_64F); 
-    Mat min_dis  =  Mat::zeros(1, para.nModes,CV_64F); 
-    Mat min_index = Mat::zeros(1, para.nModes,CV_64F);
+    Cparticle::par_dis  = Mat::zeros(para.nParticles, para.nModes, CV_64F);
+    Cparticle::par_prob = Mat::zeros(para.nParticles, para.nModes, CV_64F);
+    Cparticle::sum_prob = Mat::zeros(1, para.nModes, CV_64F);
 
     for(int j = 0; j < para.nParticles; ++j){
-        if (utils::IsParticleOutFrame(Cparticle::par_pos.row(j))) 
-            continue;
+        if (utils::IsParticleOutFrame(Cparticle::par_pos.row(j),covimg.im.rows,covimg.im.cols))
+           continue; 
         Cparticle canpar(covimg,Cparticle::par_pos.row(j),para);
-        ptestfile<<"canpar_model(:,:,"<<j+1<<")="<<canpar.m_logmCmat[0]<<";"<<endl;
-        canpar.calcdis(tarpar,j);
-        sum_dis  += Cparticle::par_dis.row(j);
-        double *p            = Cparticle::par_dis.ptr<double>(j);
-        double *pmin         = min_dis.ptr<double>(0);
-        double *pmin_index   = min_index.ptr<double>(0);
-        for(int i = 0; i < para.nModes; ++i, ++p, ++pmin, ++pmin_index){
-            if(*pmin == 0){
-                *pmin = *p;
-            }
-            else if(*pmin > *p){
-                *pmin = *p; *pmin_index = j;
-            }
-        }
+        canpar.ParticleProcess(tarpar,j);
     }
-//     ptestfile<<"min_dis = "<<min_dis<<";"<<endl;
-//     ptestfile<<"min_index = "<<min_index<<";"<<endl;
-//     ptestfile<<"tarpar_model = "<<tarpar.m_logmCmat[0]<<";"<<endl;
-//     ptestfile<<"pos_gt = "<<pos_gt<<";"<<endl;
-//     ptestfile<<"par_pos = "<<Cparticle::par_pos<<";"<<endl;
-//     ptestfile<<"par_dis = "<<Cparticle::par_dis<<";"<<endl;
-//     ptestfile.close();
-    utils::ModeTran(sum_dis, para);
-    Mat final_pos = Cparticle::par_pos.row(min_index.at<double>(0,para.currentMode));
+
+    Mat max_prob_index = Mat::zeros(1, para.nModes,CV_32S);
+    utils::ProcessAllParticles(max_prob_index);
+   
+    utils::ModeTran(para);
+    Mat final_pos = Cparticle::par_pos.row(max_prob_index.at<__int32>(0,para.currentMode));
+  
     return final_pos;
 }
 
 /* ------------------------------------------------------------ */
 
-void utils::ShowResults(CovImage covimg, string filename ,  Mat final_pos, Parameter &para, Mat pos_gt){
+void utils::ShowResults(CovImage covimg, int frameNum ,  Mat final_pos, Parameter &para, Mat pos_gt){
 
     stringstream ss;
-    ss<<"mode :"<<para.currentMode+1;
-    putText(covimg.im_in,ss.str(),Point(5,15),CV_FONT_NORMAL,0.7,Scalar(0,0,255)); 
+    ss<<"frame "<<frameNum<<" mode "<<para.currentMode+1;
+    putText(covimg.im_in,ss.str(),Point(10,15),CV_FONT_NORMAL,0.7,Scalar(0,0,0)); 
     /*
     show all the particles
     */
-    //     for (int i = 0; i <nParticles; i++){
-    //         double *p =  Cparticle::par_pos.ptr<double>(i);
-    //         Point a = Point(*p,*(p+1));
-    //         Point b = Point(*(p+2),*(p+3));
-    //         rectangle(covimg.im,a,b,Scalar(255,i,i));
-    //     }
+    //          for (int i = 0; i < para.nParticles; i++){
+    //              double *p =  Cparticle::par_pos.ptr<double>(i);
+    //              Point a = Point(*p,*(p+1));
+    //              Point b = Point(*(p+2),*(p+3));
+    //              rectangle(covimg.im_in,a,b,Scalar(0,0,0));
+    //          }
     /*
     show mode
     */
@@ -385,12 +325,7 @@ void utils::ShowResults(CovImage covimg, string filename ,  Mat final_pos, Param
     Point  a  = Point(*p,*(p+1));
     Point  b  = Point(*(p+2),*(p+3));
     rectangle(covimg.im_in,a,b,Scalar(0,0,0));
-    double deltaX = ((pos_gt.at<double>(0) + pos_gt.at<double>(2)) 
-                   -(final_pos.at<double>(0) + final_pos.at<double>(2)))/2;
-    double deltaY = ((pos_gt.at<double>(1) + pos_gt.at<double>(3)) 
-                   -(final_pos.at<double>(1) + final_pos.at<double>(3)))/2;
-    
-    //cout<<"deltaX = "<<deltaX<<"; deltaY = "<<deltaY<<endl;
+
     imshow(para.file,covimg.im_in);
     waitKey(1);
 }
@@ -435,26 +370,17 @@ vector<vector<int>> utils::ModeQuadrantRef(int nmodes){
     return v;
 }
 
-
 /* ------------------------------------------------------------ */
-void utils::updateStddev(Mat &stddevm, Parameter &para, Mat tarpos ){
-    double *ptarpos = tarpos.ptr<double>(0);
-    double width    = *(ptarpos+2) - *ptarpos;
-    double height   = *(ptarpos+3) - *(ptarpos+1);
-    stddevm = (Mat_<double>(1,4)<<para.std_x, para.std_y, 
-        para.std_gain_w*width/3 , para.std_gain_h*height/3);
-}
 
-/* ------------------------------------------------------------ */
-bool utils::IsParticleOutFrame(Mat single_par_pos){
+bool utils::IsParticleOutFrame(Mat single_par_pos, int height, int width){
     double *p = single_par_pos.ptr<double>(0);
-    for (int i = 0; i < single_par_pos.cols; ++i){
-        if (*(p++) < 0) return true;
-    }
+    if (*(p) < 0 || *(p+1) < 0 || *(p+2) > width || *(p+3) > height)
+        return true;
     return false;
 }
 
 /* ------------------------------------------------------------ */
+
 int utils::updateModeNum(Mat pos){
     double *p = pos.ptr<double>(0);
     double width  = *(p+2) - *p;
@@ -463,4 +389,35 @@ int utils::updateModeNum(Mat pos){
     //3 times of the dimensions of covariance matrices
     //4 quadrants
     return ( (halfPixelNum < FEAT_DIM3 * 3 * 4) ? 3 : 9);
+}
+
+double utils::calcIOUscore(Mat boxA, Mat boxB){
+    double *pA = boxA.ptr<double>(0);
+    double *pB = boxB.ptr<double>(0);
+    
+    double overlap_width  =  min(*(pA + 2), *(pB + 2))
+        - max(*(pA + 0), *(pB + 0));
+
+    double overlap_height =  min(*(pA + 3), *(pB + 3))
+        - max(*(pA + 1), *(pB + 1));
+    if (overlap_height <= 0 || overlap_width <= 0)
+        return 0;
+    double I = overlap_width * overlap_height;
+    double areaA =  (*(pA + 2) - *(pA + 0)) * (*(pA + 3) - *(pA + 1));
+    double areaB =  (*(pB + 2) - *(pB + 0)) * (*(pB + 3) - *(pB + 1));
+    return I/(areaA + areaB - I);
+}
+
+void utils::ProcessAllParticles(Mat &max_prob_index){
+    Mat par_prob_t = Cparticle::par_prob.t();
+    int *pmax_prob_index = max_prob_index.ptr<__int32>(0);
+    for (int i = 0; i < max_prob_index.cols; ++i, ++pmax_prob_index){
+        double *ppar_prob = par_prob_t.ptr<double>(i);
+        double max_prob = 0;
+        for(int j = 0; j < par_prob_t.cols; ++j, ++ppar_prob){
+            if (max_prob < *ppar_prob){
+                max_prob = *ppar_prob; *pmax_prob_index = j;
+           }
+        }
+    }    
 }

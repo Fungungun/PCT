@@ -21,14 +21,19 @@
 #include "SParater.h"
 #include <queue>
 
+#pragma warning(disable : 4244 4996)
 
 class Cparticle{
 
 public:
-    /* store the position of all particles*/
+    /* position of all particles*/
     static Mat par_pos;
     /* store the distance between particle with target*/
     static Mat par_dis;
+    /* probability */
+    static Mat par_prob,sum_prob;
+    /* standard deviation*/
+    static Mat stddevm;
     /* position of particle. 1*4 matrix. [x1,y1,x2,y2] */
     Mat m_pos;
     /* store the distance between the candidate with target*/
@@ -41,6 +46,8 @@ public:
     /* store the covariance matrices in nine modes
     previous para.templateNo frames*/
     deque<vector<Mat>> m_tmplib;
+    /* image patch of templates*/
+    vector<Mat> templatePatch;
 
     /* constructor 1: candidate particles*/
     Cparticle(CovImage &cim,Mat pos,Parameter& para){
@@ -61,29 +68,30 @@ public:
     Cparticle(vector<string> filename, Parameter& para, Mat pos_gt){
         cerr<<"Begin creating target with first "<<para.startFrame-1<<" frames..."<<endl;
         m_tmplib.resize(para.templateNo);
+        templatePatch.resize(para.templateNo);
         for(int i = 0; i < para.templateNo ; ++i){
             cerr<<"Processing frame "<<i+1<<"  "<<filename[i]<<endl;
             CovImage covimg_init(filename[i]);
             m_pos = pos_gt.row(i);
+            templatePatch[i] = covimg_init.im_in.colRange(m_pos.at<double>(0),
+                                                          m_pos.at<double>(2)).rowRange(
+                                                          m_pos.at<double>(1),
+                                                          m_pos.at<double>(3));
             calccovmat(covimg_init,para);
             logm();
-
-            ofstream ptestfile;
-            ptestfile.close();
-
             m_tmplib[i].resize(para.nModes);
             for(int j = 0 ; j < para.nModes ; j++){
                 m_tmplib[i][j] = m_logmCmat[j].clone();
             }
         }
-        calcModel();
         cerr<<"Target Created!"<<endl;
+        //draw sample
+        updateStddev(para);
+        GenParticlePostion(para);
     }
 
 public:
-    /* initialize target with template library
-    */
-    void calcModel();
+   
     /*  calculate the covariance matrices 
     */
     void calccovmat(CovImage &cim, Parameter &para);
@@ -98,13 +106,23 @@ public:
     void logm();
     /* calculate the distance between particles
     */
-    void calcdis(Cparticle &tarpar, int k);
-    /* calculate the weight of particle
+    void ParticleProcess(Cparticle &tarpar, int k);
+    /* calculate the probability
     */
-    /*void calcwt(Mat &par_wt,int i);*/
+    void NormProb();
     /* update model
     */
-    void updateModel(CovImage &covimg, Parameter &para);
+    void updateModel(CovImage &covimg,Parameter &para, int frameNo);
+    /*update standard deviation
+     */
+    void updateStddev(const Parameter &para);
+    /*draw sample
+     */
+    void GenParticlePostion(const Parameter &para);
+    /*resampling
+     */
+    void ResampleParticle(Parameter &para);
+    
 };
 
 

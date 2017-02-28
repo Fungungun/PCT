@@ -12,8 +12,7 @@ struct Parameter{
     int startFrame,endFrame;
     int nParticles;
     int nModes;
-    int dataset; 
-    int gt_sep; 
+    int dataset;
 
     double std_x;
     double std_y;

@@ -6,9 +6,6 @@
 #include "SParater.h"
 #include "cpp/INIReader.h"
 
-#define Debug_ 0
-#pragma warning( disable : 4244)
-
 namespace utils {
 
     /*
@@ -65,14 +62,10 @@ namespace utils {
     /*  ......
      */
     void GenImgName(vector<string> &filename, Parameter para);
-
-    /*  ......
-     */
-    Mat  GenParticlePostion(Mat meanm, Mat stddevm, int nParticles);
     /* 
         normalize the weight of particles
     */
-    void ModeTran(Mat sum_wt, Parameter &para);
+    void ModeTran(Parameter &para);
 
     /*  
      * generate different modes
@@ -87,7 +80,7 @@ namespace utils {
     /*  
     ...
      */
-    void ShowResults(CovImage covimg, string filename , Mat final_pos, Parameter &para, Mat pos_gt);
+    void ShowResults(CovImage covimg, int frameNum , Mat final_pos, Parameter &para, Mat pos_gt);
 
     /*  
     ...
@@ -98,21 +91,25 @@ namespace utils {
     ...
      */
     vector<Point> calcpoint_draw(int nModes);
-
-    /*  
-    ...
-     */
-    void updateStddev(Mat &stddev, Parameter &para, Mat tarpos);
-
     /*
     ...
      */
-    bool IsParticleOutFrame(Mat single_par_pos);
+    bool IsParticleOutFrame(Mat single_par_pos, int height, int width);
 
     /*
     ...
      */
     int updateModeNum(Mat pos);
+
+    /*
+    ...
+     */
+    double calcIOUscore(Mat boxA, Mat boxB);
+    /*
+    ...
+     */
+    void ProcessAllParticles(Mat &min_index);
+
 };
 
 #endif

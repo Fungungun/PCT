@@ -1,7 +1,6 @@
 #ifndef __TEST_6_H__
 #define __TEST_6_H__
 
-
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -21,10 +20,6 @@
 
 using namespace std;
 using namespace cv;
-
-
-extern ofstream ptestfile;
-
 
 
 #endif

@@ -32,7 +32,7 @@ int main( int argc, char** argv )
 
         //write results to file
         ofstream  presults;
-        presults.open(".//results//" + para.file + ".txt");
+        presults.open(".//results//" + para.file + ".txt",ios::trunc);
         presults<<para.file<<" "<<para.dataset<<endl;
 
         //tracking start
@@ -41,21 +41,23 @@ int main( int argc, char** argv )
             CovImage covimg(filename[i]);
             cout<<"Tracking Frame "<<i+1<<"..."<<endl;
             //search
-            tarpar.m_pos = utils::SearchParticle(covimg,tarpar,para,pos_gt.row(i));
+            tarpar.m_pos = utils::SearchParticle(covimg,tarpar,para,pos_gt.row(i)).clone();
             //model update
-            if(para.updateFreq != 0){
-                if(para.currentMode == 0 && i % para.updateFreq == 0){
-                    tarpar.updateModel(covimg,para);
-                }
-            }        
-            //show results 
-            utils::ShowResults(covimg,filename[i],tarpar.m_pos, para, pos_gt.row(i));
+            tarpar.updateModel(covimg,para,i);
+             
+            //show results
+            utils::ShowResults(covimg,i,tarpar.m_pos, para, pos_gt.row(i));
+            
+            //resampling
+            tarpar.ResampleParticle(para);
+             
+            cout<<tarpar.m_pos<<endl;
+            cout<<utils::calcIOUscore(pos_gt.row(i),tarpar.m_pos)<<endl;
             //write results to file
             presults<<i+1<<" "<<para.currentMode+1<<" "<<tarpar.m_pos<<endl;
         }
         presults.close();
         destroyAllWindows();
-        
     }
     //system("shutdown -h");
     
