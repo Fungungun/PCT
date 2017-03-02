@@ -14,6 +14,8 @@ void utils::LoadVideoList(vector<string> &video_list){
     string line;
     while (!inf.eof()) {
         getline(inf,line);
+        line.erase(line.begin());
+        line.erase(line.end()-1);
         video_list.push_back(line);
     }
 }

@@ -189,10 +189,7 @@ void Cparticle::ResampleParticle(Parameter &para){
     
     for (int i = 0; i < CountPar.size(); ++i){
         CountPar[i] = ceil(current_prob.at<double>(i) * para.nParticles); 
-     
     }
-
-    
     Mat ParPos_wh       = Mat::zeros(para.nParticles,4,CV_64F); 
     for(int i = 0, k = 0; i < para.nParticles ; ++k){
         int par_no = current_prob_idx.at<__int32>(k);

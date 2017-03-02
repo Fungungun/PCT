@@ -6,9 +6,7 @@ Chenghuan Liu , Du Huynh, Jan 2017.
 
 #include "Test6.h"
 
-
-
-int main( int argc, char** argv )
+int main(int argc, char** argv)
 {
     vector<string> video_list;
     utils::LoadVideoList(video_list);
@@ -36,7 +34,7 @@ int main( int argc, char** argv )
         presults<<para.file<<" "<<para.dataset<<endl;
 
         //tracking start
-        for(int i = para.startFrame - 1; i < para.endFrame ; ++i){
+        for(int i = para.startFrame - 1; i < para.endFrame; ++i){
             //load new frame 
             CovImage covimg(filename[i]);
             cout<<"Tracking Frame "<<i+1<<"..."<<endl;
