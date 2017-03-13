@@ -6,7 +6,7 @@ function result = showresults(file,fps,wndsize,showimage)
 
 warning('off')
 file
-%-------------------------load data
+%-------------------------load my results
 pf = fopen([file '.txt'],'r');
 tline = fgetl(pf);
 str = strsplit(tline);
@@ -27,6 +27,9 @@ while ~feof(pf)
     i = i + 1;
 end
 fclose(pf);
+%-------------------------load staple results
+pos_staple        = dlmread(['C:\Users\21558188\Desktop\PhD\GitHub\staple\results\' file '.txt'],'\t');
+pos_staple([1],:) = [];
 %-------------------------load groundtruth
 pf = fopen(['../../videos/' file '/gt.txt'],'r');
 tline = fgetl(pf); % get rid of the first line
@@ -58,8 +61,13 @@ end
 
 numFrame = length(num);
 result.numFrame = numFrame;
-result.sumiou = sum(iou);
+result.sumiou   = sum(iou);
+result.pos      = pos_wh;
 avgIOU = result.sumiou/result.numFrame
+
+faceocc1_interest_frame = [1 34 91 160 171 190 257 288 380 427 440 455 619 745 850];
+
+k = 1;
 
 if showimage == 1
     %---------------------------show image
@@ -80,6 +88,18 @@ if showimage == 1
         1 3 6 4 1 3 6; %mode 9
         ];
     
+    mispart_index = [
+        1 1 1 1 1; %mode 1
+        1 2 5 4 1; %mode 2
+        2 3 6 5 2; %mode 3
+        4 5 8 7 4; %mode 4
+        5 6 9 8 5; %mode 5
+        1 2 8 7 1; %mode 6
+        2 3 9 8 2; %mode 7
+        1 3 6 4 1; %mode 8
+        4 6 9 7 4; %mode 9
+        ];
+    
     numzeros = (dataset == 0) * 4 + (dataset == 1) * 8;
     s_frames = cell(numFrame,1);
     nz	= strcat('%0',num2str(numzeros),'d');
@@ -89,18 +109,38 @@ if showimage == 1
         s_frames{t} = strcat('../../videos/',file,'/',id,'.',fext);
         point_draw = calcpoint_draw(pos(t,:));
         %image
-        imshow(s_frames{t},'InitialMagnification',wndsize);
+        I = imshow(s_frames{t},'InitialMagnification',wndsize,'border','tight');
         hold on
         %groud truth
-        rectangle('Position',pos_gt_wh(t,:),'LineWidth',10);
+        gt_rec = rectangle('Position',pos_gt_wh(t,:),'LineWidth',3);
+        %other trackers
+        %staple
+        staple_rec = rectangle('Position',pos_staple(t,:),'LineWidth',3,'EdgeColor',[0 0 1],'LineStyle','--');
+        %STCT
+        
         %text
         index = mode9_index(mode(t),:);
-        text(20,20,['frame ' num2str(t) '  IOU score ' num2str(iou(t)) '  mode ' num2str(mode(t))], ...
-            'FontSize',14,'Color','red')
+        mis_index = mispart_index(mode(t),:);
+         %text(20,20,['frame ' num2str(t) '  IOU score ' num2str(iou(t)) '  mode ' num2str(mode(t))], ...
+         %    'FontSize',14,'Color','red')
         for i = 1:6
             x = [point_draw(index(i),1),point_draw(index(i+1),1)];
             y = [point_draw(index(i),2),point_draw(index(i+1),2)];
-            plot(x,y,'w-','LineWidth',10)
+            plot(x,y,'r-','LineWidth',3)
+        end
+        %draw miss part
+        for i = 1:4
+            x_mis = [point_draw(mis_index(i),1),point_draw(mis_index(i+1),1)];
+            y_mis = [point_draw(mis_index(i),2),point_draw(mis_index(i+1),2)];
+            plot(x_mis,y_mis,'--r','LineWidth',3)
+        end
+        text(20,20,['Frame #' num2str(t) '  mode ' num2str(mode(t))],'FontSize',20,'Color','red')
+        axis normal
+        
+        if k <= length(faceocc1_interest_frame)
+            if t == faceocc1_interest_frame(k) && strcmp(file,'faceocc1') 
+            saveas(I,['./' file '/frame' num2str(t) '.bmp'],'bmp'); k = k+1;
+            end
         end
         pause(1/fps)
         cla

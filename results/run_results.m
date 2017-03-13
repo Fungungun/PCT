@@ -1,30 +1,21 @@
 clc
+clear all
 showimage = 0;
-i = 1;
 
-video_sequence{i}.name = 'sphere'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'girl2'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'Walking'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'surfing'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'David3'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 200;  i = i+1;
-video_sequence{i}.name = 'bolt'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'FaceOcc1'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'polarbear'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400; i = i+1;
-video_sequence{i}.name = 'bicycle'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'ball'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'jogging'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
-video_sequence{i}.name = 'jogging2'; video_sequence{i}.fps = 50; video_sequence{i}.wndsize = 400;  i = i+1;
+video = dir('C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\videos');
 
 results.numFrame = 0;
 results.sumiou   = 0;
+results.pos      = zeros(1,4);
 
-for i = 1:(length(video_sequence)-1)
-    tmp = showresults(video_sequence{i}.name,video_sequence{i}.fps,video_sequence{i}.wndsize,showimage);
+for j = 1:length(video)-2
+    tmp = showresults(video(j+2).name,50,400,showimage);
     results.numFrame = results.numFrame + tmp.numFrame;
     results.sumiou   = results.sumiou + tmp.sumiou;
+    results.pos      = [results.pos; tmp.pos];
 end
-
-disp(['average IOU score of these' num2str(length(video_sequence)-1) 'is'])
+results.pos([1],:) = []; 
+disp(['average IOU score of these ' num2str(length(video)-2) ' videos is'])
 results.sumiou/results.numFrame
 
 if showimage == 1
