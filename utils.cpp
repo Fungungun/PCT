@@ -113,7 +113,6 @@ Mat utils::LoadPosGT(Parameter para){
 
     char gt_sep;
 
-
     string line;
     size_t sep, sep2;
     getline(inf,line);
@@ -131,8 +130,7 @@ Mat utils::LoadPosGT(Parameter para){
     }
     pos_gt.col(2) = pos_gt.col(0) + pos_gt.col(2);
     pos_gt.col(3) = pos_gt.col(1) + pos_gt.col(3);
-    pos_gt -= 1; // index starts from 0
-
+    pos_gt -= 1; // index of pixel should start from 0
     cerr<<"Done!"<<endl;
     return pos_gt;
 }
@@ -184,7 +182,6 @@ void utils::getHorizontalHalf(int x1, int y1, int x2, int y2,
 /* ------------------------------------------------------------ */
 
 void utils::GenImgName(vector<string> &filename, Parameter para){
-
     cerr<<"Generating file names of images...";
     for(int i = 0; i < para.endFrame; ++i){
         stringstream sstr; 
@@ -382,7 +379,7 @@ bool utils::IsParticleOutFrame(Mat single_par_pos, int height, int width){
 }
 
 /* ------------------------------------------------------------ */
-
+//choose the number of modes according to the number of the pixels(how large the target is)
 int utils::updateModeNum(Mat pos){
     double *p = pos.ptr<double>(0);
     double width  = *(p+2) - *p;

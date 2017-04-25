@@ -35,7 +35,4 @@ struct Parameter{
     int updateFreq;
 
 };
-
-
-
 #endif

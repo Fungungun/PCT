@@ -1,4 +1,4 @@
-function result = showresults(file,fps,wndsize,showimage)
+function result = showresults(file,fps,wndsize,showimage,saveimage)
 
 %file   : ball, surfing, david3 etc
 %fps    : 100,50,20 etc
@@ -28,8 +28,8 @@ while ~feof(pf)
 end
 fclose(pf);
 %-------------------------load staple results
-pos_staple        = dlmread(['C:\Users\21558188\Desktop\PhD\GitHub\staple\results\' file '.txt'],'\t');
-pos_staple([1],:) = [];
+%pos_staple        = dlmread(['C:\Users\21558188\Desktop\PhD\GitHub\staple\results\' file '.txt'],'\t');
+%pos_staple([1],:) = [];
 %-------------------------load groundtruth
 pf = fopen(['../../videos/' file '/gt.txt'],'r');
 tline = fgetl(pf); % get rid of the first line
@@ -115,7 +115,7 @@ if showimage == 1
         gt_rec = rectangle('Position',pos_gt_wh(t,:),'LineWidth',3);
         %other trackers
         %staple
-        staple_rec = rectangle('Position',pos_staple(t,:),'LineWidth',3,'EdgeColor',[0 0 1],'LineStyle','--');
+        %staple_rec = rectangle('Position',pos_staple(t,:),'LineWidth',3,'EdgeColor',[0 0 1],'LineStyle','--');
         %STCT
         
         %text
@@ -142,7 +142,13 @@ if showimage == 1
             saveas(I,['./' file '/frame' num2str(t) '.bmp'],'bmp'); k = k+1;
             end
         end
-        pause(1/fps)
+        
+        if saveimage
+            mkdir(['./resultImg/' file])
+            imgnamet = [sprintf('%04d',t) '.jpg'];
+            saveas(I,['./resultImg/' file '/' imgnamet],'jpg');
+        end
+        %pause(1/fps*(1-saveimage))
         cla
     end
     close all

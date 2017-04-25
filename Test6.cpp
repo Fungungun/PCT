@@ -1,7 +1,5 @@
 /* A small test program.
-
 Chenghuan Liu , Du Huynh, Jan 2017.
-
 */
 
 #include "Test6.h"
@@ -15,6 +13,7 @@ int main(int argc, char** argv)
     for(int video_count = 0; video_count < video_list.size(); ++video_count){
         //load parameters from config.ini
         para.file = video_list[video_count];
+        cerr<<"Video title: "<<para.file<<endl;
         utils::InitPara(para);
 
         //load ground truth of position
@@ -58,5 +57,4 @@ int main(int argc, char** argv)
         destroyAllWindows();
     }
     //system("shutdown -h");
-    
 }

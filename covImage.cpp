@@ -1,7 +1,6 @@
 /*
 * Chenghuan Liu, Du Huynh, Jan 2017.
 */
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -23,7 +22,6 @@
 
 
 /* ------------------------------------------------------------ */
-
 void CovImage::coordinateX(){
     double *outptr;
     /*
@@ -38,9 +36,7 @@ void CovImage::coordinateX(){
         }
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::coordinateY(){
     double *outptr;
     for (int r=0; r < nRows; r++) {
@@ -50,9 +46,7 @@ void CovImage::coordinateY(){
         }
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::intensity(int channel){
    // uchar *inptr;
     double *inptr;
@@ -66,9 +60,7 @@ void CovImage::intensity(int channel){
         }
     }
 }
-
 /* ------------------------------------------------------------ */
-
 /** Make sure that the 'intensity' function is called before this function. */
 void CovImage::gradientX(int channel){
     double *inptr;  // pointing to intensity of the channel
@@ -87,9 +79,7 @@ void CovImage::gradientX(int channel){
         *outptr = *(outptr-dim);
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::gradientY(int channel){
     double *inptr1;   // pointing to intensity of the channel
     double *inptr2;
@@ -118,9 +108,7 @@ void CovImage::gradientY(int channel){
         *outptr2 = *outptr;
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::gradient2X(int channel){
     double *inptr;  // pointing to intensity of the channel
     double *outptr; // pointing to gradient-x of the channel
@@ -138,9 +126,7 @@ void CovImage::gradient2X(int channel){
         *outptr = *(outptr-dim);
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::gradient2Y(int channel){
     double *inptr1;   // pointing to intensity of the channel
     double *inptr2;
@@ -171,9 +157,7 @@ void CovImage::gradient2Y(int channel){
         *outptr2 = *outptr;
     }
 }
-
 /* ------------------------------------------------------------ */
-
 void CovImage::computeIntegralImage(){
     // initialize and compute the integral image
     int L = total(dim);
@@ -248,9 +232,7 @@ Vec<double,II_DIM1> CovImage::interpIIprod1(double x, double y){
         (1-s)*t*pv2 + s*t*pv3;
     return vprod;
 }
-
 /* ------------------------------------------------------------ */
-
 Vec<double,II_DIM3> CovImage::interpIIprod3(double x, double y){
     int x0 = (int)(floor(x));
     int x1 = (int)(ceil(x));
@@ -266,9 +248,7 @@ Vec<double,II_DIM3> CovImage::interpIIprod3(double x, double y){
         (1-s)*t*pv2 + s*t*pv3;
     return vprod;
 }
-
 /* ------------------------------------------------------------ */
-
 Vec<double,FEAT_DIM1> CovImage::interpIIsum1(double x, double y){
     int x0 = (int)(floor(x));
     int x1 = (int)(ceil(x));
@@ -303,7 +283,6 @@ Vec<double,FEAT_DIM3> CovImage::interpIIsum3(double x, double y){
 }
 
 /* ------------------------------------------------------------ */
-
 void CovImage::covComponentMatrices(double x1, double y1, double x2, double y2,
     Mat &prodM, Mat &sumM, double &Npixels){
     int L = IIprod.channels();
@@ -357,9 +336,6 @@ void CovImage::covComponentMatrices(double x1, double y1, double x2, double y2,
 }
 
 /* ------------------------------------------------------------ */
-
-
-
 Mat CovImage::covMatrix(double x1, double y1, double x2, double y2,
     double &Npixels){
     Mat prodM, sumM, covmat;
@@ -369,7 +345,7 @@ Mat CovImage::covMatrix(double x1, double y1, double x2, double y2,
 }
 
 /* ------------------------------------------------------------ */
-
+// crop the rectangle without interpolation 
 // void CovImage::covComponentMatrices(int x1, int y1, int x2, int y2,
 //                                     Mat &prodM, Mat &sumM, double &Npixels)
 // {

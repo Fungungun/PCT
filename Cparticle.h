@@ -36,8 +36,6 @@ public:
     static Mat stddevm;
     /* position of particle. 1*4 matrix. [x1,y1,x2,y2] */
     Mat m_pos;
-    /* store the distance between the candidate with target*/
-    //Mat m_distance;
     /* covariance matrices */
     vector<Mat> m_cmat; 
     /* logm of covariance matrices*/
@@ -55,8 +53,7 @@ public:
         calccovmat(cim,para);
         logm();  
     }
-
-    /* constructor 2:  initialization of the target in 1st frame*/
+/* constructor 2:  initialization of the target in 1st frame*/
 //     Cparticle(CovImage &cim, Parameter para){
 //         int nModes = (int)(para.v.size());
 //         m_pos = (Mat_<double>(1,4)<<para.x1, para.y1, para.x2, para.y2);
@@ -65,6 +62,9 @@ public:
 //     }
 
     /* constructor 3: create target with template library*/
+    /*this part assume that more than one frame can be used for training which is not 
+        allowed. This part needs to be modified later. Currently we only use one frame
+        for training. */
     Cparticle(vector<string> filename, Parameter& para, Mat pos_gt){
         cerr<<"Begin creating target with first "<<para.startFrame-1<<" frames..."<<endl;
         m_tmplib.resize(para.templateNo);

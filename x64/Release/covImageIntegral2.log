@@ -1,10 +1,10 @@
-﻿Build started 1/03/2017 7:52:57 PM.
+﻿Build started 24/04/2017 10:27:34 PM.
      1>Project "C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\covImageIntegral2\covImageIntegral2.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "x64\Release\covImageIntegral2.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt Test6.cpp
-         Test6.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\CL.exe /c /Zi /nologo /W3 /WX- /O2 /Oi /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc100.pdb" /Gd /TP /errorReport:prompt Cparticle.cpp
+         Cparticle.cpp
          All outputs are up-to-date.
        Link:
          c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Release\covImageIntegral2.exe" /INCREMENTAL:NO /NOLOGO opencv_calib3d2410.lib opencv_contrib2410.lib opencv_core2410.lib opencv_features2d2410.lib opencv_flann2410.lib opencv_gpu2410.lib opencv_highgui2410.lib opencv_imgproc2410.lib opencv_legacy2410.lib opencv_ml2410.lib opencv_nonfree2410.lib opencv_objdetect2410.lib opencv_ocl2410.lib opencv_photo2410.lib opencv_stitching2410.lib opencv_superres2410.lib opencv_videostab2410.lib opencv_video2410.lib opencv_ts2410.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"x64\Release\covImageIntegral2.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Release\covImageIntegral2.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\21558188\Desktop\PhD\Code\VS\covImageIntegral2\x64\Release\covImageIntegral2.lib" /MACHINE:X64 x64\Release\covImage.obj
@@ -26,4 +26,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.05
+Time Elapsed 00:00:03.24

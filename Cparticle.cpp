@@ -176,9 +176,8 @@ void Cparticle::ResampleParticle(Parameter &para){
     //update standard deviation
     updateStddev(para);
     //sort probability
-   
     NormProb();
-    
+
     Mat current_prob = Cparticle::par_prob.col(para.currentMode).clone();
     Mat current_prob_idx;
     cv::sortIdx(current_prob,

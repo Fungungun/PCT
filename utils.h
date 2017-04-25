@@ -46,19 +46,14 @@ namespace utils {
     */
     void getQuadrants(int x1, int y1, int x2, int y2,
         int *qx1, int *qy1, int *qx2, int *qy2);
-
-
     /*  ......
      */
     void getVerticalHalf(int x1, int y1, int x2, int y2,
         int *qx1, int *qy1, int *qx2, int *qy2);
-
-
     /*  ......
      */
     void getHorizontalHalf(int x1, int y1, int x2, int y2,
         int *qx1, int *qy1, int *qx2, int *qy2);
-
     /*  ......
      */
     void GenImgName(vector<string> &filename, Parameter para);
@@ -66,27 +61,22 @@ namespace utils {
         normalize the weight of particles
     */
     void ModeTran(Parameter &para);
-
     /*  
      * generate different modes
      */
     vector<vector<int>> CovmatQuadrantRef(int modes);
-
     /*
     ...
      */
     Mat SearchParticle(CovImage &covimg, Cparticle &tarpar, Parameter &para, Mat pos_gt);
-
     /*  
     ...
      */
     void ShowResults(CovImage covimg, int frameNum , Mat final_pos, Parameter &para, Mat pos_gt);
-
     /*  
     ...
      */
     vector<vector<int>> ModeQuadrantRef(int nModes);
-
     /*  
     ...
      */
@@ -95,12 +85,10 @@ namespace utils {
     ...
      */
     bool IsParticleOutFrame(Mat single_par_pos, int height, int width);
-
     /*
     ...
      */
     int updateModeNum(Mat pos);
-
     /*
     ...
      */
@@ -109,7 +97,6 @@ namespace utils {
     ...
      */
     void ProcessAllParticles(Mat &min_index);
-
 };
 
 #endif

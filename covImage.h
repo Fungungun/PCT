@@ -35,8 +35,10 @@ using namespace cv;
 class CovImage {
 
  public:
-    /* input image */
-    Mat im_in;    
+     /* input image */
+     Mat im_in;    
+     /* area around of the target of input image */
+     Mat im_in_sub;    
     /*image in Lab space*/
     Mat im;
     /* #channels of im */
@@ -56,7 +58,6 @@ class CovImage {
      * This is also the step between adjacent pixels.
      */
     int dim;
-
     /* the integral image consists of two parts: (1) IIprod is an nRows x
      * nCols x L image where L = 1 + 2 + ... + dim storing the cumulative
      * product of the different components with each other. (2) IIsum is an
@@ -75,10 +76,10 @@ class CovImage {
      *   filename - the name of the image file.
      */
     CovImage(string filename) {
-        //cerr << "constructor 1\n";
-        //rgb -> CV_32F -> Lab -> CV_64F
         im_in = imread(filename, -1);
         if (im_in.channels() == 3){
+            //following these steps to convert RGB to 64FLab
+            //rgb -> CV_32F -> Lab -> CV_64F
             Mat tmp;
             im_in.convertTo(tmp,CV_32F);
             tmp *= 1./255;
@@ -91,6 +92,34 @@ class CovImage {
         process();
     }
 
+    /* Constructor. Read in a greyscale or colour image stored in the file
+     * and construct a CovImage object 
+            ****of only a small search area around the target. ****
+     * Input parameter:
+     *   filename - the name of the image file.
+     *   tarpos   - position of the target in last frame
+     */
+
+    CovImage(string filename, Mat &tarpos){
+        //cerr << "constructor 1\n";
+        im_in = imread(filename, -1);
+        
+        if (im_in.channels() == 3){
+            //following these steps to convert RGB to 64FLab
+            //rgb -> CV_32F -> Lab -> CV_64F
+            Mat tmp;
+            im_in.convertTo(tmp,CV_32F);
+            tmp *= 1./255;
+            cvtColor(tmp,im,CV_BGR2Lab);
+            im.convertTo(im,CV_64F);
+        }
+        else{
+            im_in.convertTo(im,CV_64F);
+        }
+        process();
+    }
+
+
     /* Constructor. Read in a greyscale image stored in text format in the
      * given file. This constructor should be used for debugging purpose.
      * Input parameters:
@@ -102,6 +131,7 @@ class CovImage {
         im = debug::readTextFile(filename);
         process();
     }
+
 
     /* Constructor. This constructor can be used for directly debugging,
      * e.g. to test whether the integral image and covariance matrix are
