@@ -35,7 +35,8 @@ int main(int argc, char** argv)
         //tracking start
         for(int i = para.startFrame - 1; i < para.endFrame; ++i){
             //load new frame 
-            CovImage covimg(filename[i]);
+            //CovImage covimg(filename[i]);
+            CovImage covimg(filename[i],para.SearchAreaMargin,tarpar.m_pos);
             cout<<"Tracking Frame "<<i+1<<"..."<<endl;
             //search
             tarpar.m_pos = utils::SearchParticle(covimg,tarpar,para,pos_gt.row(i)).clone();

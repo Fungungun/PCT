@@ -35,18 +35,23 @@ using namespace cv;
 class CovImage {
 
  public:
-     /* input image */
-     Mat im_in;    
-     /* area around of the target of input image */
-     Mat im_in_sub;    
+    /*search area*/
+     Mat mSearchArea;
+
+    /*input image*/
+    Mat im_in;    
     /*image in Lab space*/
     Mat im;
+
+
     /* #channels of im */
     int nChannels;
     /* #rows of im */
     int nRows;
     /* #columns of im */
     int nCols;
+
+
     /* featimage stores the feature vectors of all the pixels. This is an
      * nRows x nCols x dim image. The components of the feature vector are: x,
      * y, I, Ix, Iy, Ixx, Iyy. Each of the last 5 components may repeat 3
@@ -69,7 +74,8 @@ class CovImage {
     Mat IIprod;
     Mat IIsum;
 
- public:
+public:
+
     /* Constructor. Read in a greyscale or colour image stored in the file
      * and construct a CovImage object.
      * Input parameter:
@@ -77,19 +83,8 @@ class CovImage {
      */
     CovImage(string filename) {
         im_in = imread(filename, -1);
-        if (im_in.channels() == 3){
-            //following these steps to convert RGB to 64FLab
-            //rgb -> CV_32F -> Lab -> CV_64F
-            Mat tmp;
-            im_in.convertTo(tmp,CV_32F);
-            tmp *= 1./255;
-            cvtColor(tmp,im,CV_BGR2Lab);
-            im.convertTo(im,CV_64F);
-        }
-        else{
-            im_in.convertTo(im,CV_64F);
-        }
-        process();
+        imin_rgb2lab();
+       process();
     }
 
     /* Constructor. Read in a greyscale or colour image stored in the file
@@ -99,24 +94,14 @@ class CovImage {
      *   filename - the name of the image file.
      *   tarpos   - position of the target in last frame
      */
-
-    CovImage(string filename, Mat &tarpos){
-        //cerr << "constructor 1\n";
+    CovImage(string filename, float SearchAreaMargin, Mat &tarpos) {
         im_in = imread(filename, -1);
-        
-        if (im_in.channels() == 3){
-            //following these steps to convert RGB to 64FLab
-            //rgb -> CV_32F -> Lab -> CV_64F
-            Mat tmp;
-            im_in.convertTo(tmp,CV_32F);
-            tmp *= 1./255;
-            cvtColor(tmp,im,CV_BGR2Lab);
-            im.convertTo(im,CV_64F);
-        }
-        else{
-            im_in.convertTo(im,CV_64F);
-        }
-        process();
+        imin_rgb2lab();
+        SetSearchArea(SearchAreaMargin, tarpos);
+        //cout<<tarpos<<endl;
+        //cout<<SearchAreaMargin<<endl;
+        //cout<<mSearchArea<<endl;
+       process();
     }
 
 
@@ -155,62 +140,15 @@ class CovImage {
     /* destructor */
     ~CovImage() {}
 
-    /* *** the following functions should be changed to 'private' after
-     *  debugging is finished
-     */
+public:
+/*  Set the search area */
+    void SetSearchArea(float SearchAreaMargin, Mat &tarpos);
+/*  convert default rgb image to CV_64F Lab image */
+    void imin_rgb2lab(); 
+/* this function contains a long sequence of operations. It is called by the constructor.*/
+    void process();
 
-    /* this function contains a long sequence of operations. It is called by
-     *  the constructor.
-     */
-    void process() {
-        nChannels = im.channels();
-        nRows = im.rows;
-        nCols = im.cols;
-        dim = nChannels*5 + 2;
-        /*
-        cerr << "nRows = " << nRows << " Ncols = " << nCols;
-        cerr << " dim = " << dim << "\n";
-        */
-        assert(dim == FEAT_DIM1 || dim == FEAT_DIM3);
-
-        // initialize featimage
-        if (dim == FEAT_DIM1)
-            featimage = Mat_<Vec<double,FEAT_DIM1> >(nRows, nCols);
-        else
-            featimage = Mat_<Vec<double,FEAT_DIM3> >(nRows, nCols);
-
-        coordinateX();
-        coordinateY();
-		
-// 		cerr << "coordinateX() done\n";
-// 		debug::printDoubleMat(featimage, 0);
-// 		cerr << "coordinateY() done\n";
-// 		debug::printDoubleMat(featimage, 1);
-				
-
-        for (int c=0; c < nChannels; c++) {
-            intensity(c);
-			gradientX(c);
-			gradientY(c);  // should be in channel 2+2*nChannels+c
-			gradient2X(c); // channel 2+3*nChannels+c
-			gradient2Y(c); // channel 2+4*nChannels+c
-
-//          cerr << "intensity() channel " << c << " done\n";
-//          debug::printDoubleMat(featimage, 2+c);
-//          cerr << "gradientX() channel " << c << " done\n";
-//          debug::printDoubleMat(featimage, 2+nChannels+c);
-// 			cerr << "gradientY() channel " << c << " done\n";
-// 			debug::printDoubleMat(featimage, 2+2*nChannels+c);
-// 			cerr << "gradient2X() channel " << c << " done\n";
-// 			debug::printDoubleMat(featimage, 2+3*nChannels+c);
-// 			cerr << "gradient2Y() channel " << c << " done\n";
-// 			debug::printDoubleMat(featimage, 2+4*nChannels+c);	
-
-        }
-
-        computeIntegralImage();
-    }
-
+public:
     /* ...... */
     void coordinateX();
 

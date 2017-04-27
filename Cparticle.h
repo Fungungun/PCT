@@ -47,8 +47,9 @@ public:
     /* image patch of templates*/
     vector<Mat> templatePatch;
 
+public:
     /* constructor 1: candidate particles*/
-    Cparticle(CovImage &cim,Mat pos,Parameter& para){
+    Cparticle(CovImage &cim,Mat &pos,Parameter& para){
         m_pos = pos.clone();
         calccovmat(cim,para);
         logm();  
@@ -65,7 +66,7 @@ public:
     /*this part assume that more than one frame can be used for training which is not 
         allowed. This part needs to be modified later. Currently we only use one frame
         for training. */
-    Cparticle(vector<string> filename, Parameter& para, Mat pos_gt){
+    Cparticle(vector<string> filename, Parameter& para, Mat &pos_gt){
         cerr<<"Begin creating target with first "<<para.startFrame-1<<" frames..."<<endl;
         m_tmplib.resize(para.templateNo);
         templatePatch.resize(para.templateNo);

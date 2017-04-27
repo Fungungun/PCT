@@ -22,6 +22,91 @@
 
 
 /* ------------------------------------------------------------ */
+ void CovImage::SetSearchArea(float SearchAreaMargin, Mat &tarpos){
+     //SearchArea: x1,y1,x2,y2
+     //(x1,y1) is the top left corner 
+     //(x1,y2) is the bottom right corner
+     mSearchArea = tarpos.clone();
+     double *pSearchArea = mSearchArea.ptr<double>(0);
+     double *ptarpos     = tarpos.ptr<double>(0);
+
+     *pSearchArea       = *ptarpos - SearchAreaMargin <= 0 ? 
+                            0 : (*ptarpos - SearchAreaMargin);
+     *(pSearchArea+1)   = *(ptarpos+1) - SearchAreaMargin <= 0 ?
+                            0 : (*(ptarpos+1) - SearchAreaMargin);
+     *(pSearchArea+2)   = *(ptarpos+2) + SearchAreaMargin >= nCols ?
+                            nCols : (*(ptarpos+2) + SearchAreaMargin);
+     *(pSearchArea+3)   = *(ptarpos+3) + SearchAreaMargin >= nRows ?
+                            nRows : (*(ptarpos+3) + SearchAreaMargin);
+}
+
+/* ------------------------------------------------------------ */
+ void CovImage::imin_rgb2lab(){
+        if (im_in.channels() == 3){
+            //following these steps to convert RGB to 64FLab
+            //rgb -> CV_32F -> Lab -> CV_64F
+            Mat tmp;
+            im_in.convertTo(tmp,CV_32F);
+            tmp *= 1./255;
+            cvtColor(tmp,im,CV_BGR2Lab);
+            im.convertTo(im,CV_64F);
+        }
+        else{
+            im_in.convertTo(im,CV_64F);
+        }
+        nChannels = im.channels();
+        nRows = im.rows;
+        nCols = im.cols;
+        dim = nChannels*5 + 2;
+        /*
+        cerr << "nRows = " << nRows << " Ncols = " << nCols;
+        cerr << " dim = " << dim << "\n";
+        */
+    }
+ 
+/* ------------------------------------------------------------ */
+     void CovImage::process() {
+        
+        assert(dim == FEAT_DIM1 || dim == FEAT_DIM3);
+
+        // initialize featimage
+        if (dim == FEAT_DIM1)
+            featimage = Mat_<Vec<double,FEAT_DIM1> >(nRows, nCols);
+        else
+            featimage = Mat_<Vec<double,FEAT_DIM3> >(nRows, nCols);
+
+        coordinateX();
+        coordinateY();
+		
+// 		cerr << "coordinateX() done\n";
+// 		debug::printDoubleMat(featimage, 0);
+// 		cerr << "coordinateY() done\n";
+// 		debug::printDoubleMat(featimage, 1);
+				
+
+        for (int c=0; c < nChannels; c++) {
+            intensity(c);
+			gradientX(c);
+			gradientY(c);  // should be in channel 2+2*nChannels+c
+			gradient2X(c); // channel 2+3*nChannels+c
+			gradient2Y(c); // channel 2+4*nChannels+c
+
+//          cerr << "intensity() channel " << c << " done\n";
+//          debug::printDoubleMat(featimage, 2+c);
+//          cerr << "gradientX() channel " << c << " done\n";
+//          debug::printDoubleMat(featimage, 2+nChannels+c);
+// 			cerr << "gradientY() channel " << c << " done\n";
+// 			debug::printDoubleMat(featimage, 2+2*nChannels+c);
+// 			cerr << "gradient2X() channel " << c << " done\n";
+// 			debug::printDoubleMat(featimage, 2+3*nChannels+c);
+// 			cerr << "gradient2Y() channel " << c << " done\n";
+// 			debug::printDoubleMat(featimage, 2+4*nChannels+c);	
+        }
+        computeIntegralImage();
+    }
+
+
+/* ------------------------------------------------------------ */
 void CovImage::coordinateX(){
     double *outptr;
     /*
@@ -37,6 +122,7 @@ void CovImage::coordinateX(){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::coordinateY(){
     double *outptr;
     for (int r=0; r < nRows; r++) {
@@ -47,6 +133,7 @@ void CovImage::coordinateY(){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::intensity(int channel){
    // uchar *inptr;
     double *inptr;
@@ -80,6 +167,7 @@ void CovImage::gradientX(int channel){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::gradientY(int channel){
     double *inptr1;   // pointing to intensity of the channel
     double *inptr2;
@@ -109,6 +197,7 @@ void CovImage::gradientY(int channel){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::gradient2X(int channel){
     double *inptr;  // pointing to intensity of the channel
     double *outptr; // pointing to gradient-x of the channel
@@ -127,6 +216,7 @@ void CovImage::gradient2X(int channel){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::gradient2Y(int channel){
     double *inptr1;   // pointing to intensity of the channel
     double *inptr2;
@@ -158,6 +248,7 @@ void CovImage::gradient2Y(int channel){
     }
 }
 /* ------------------------------------------------------------ */
+
 void CovImage::computeIntegralImage(){
     // initialize and compute the integral image
     int L = total(dim);
@@ -233,6 +324,7 @@ Vec<double,II_DIM1> CovImage::interpIIprod1(double x, double y){
     return vprod;
 }
 /* ------------------------------------------------------------ */
+
 Vec<double,II_DIM3> CovImage::interpIIprod3(double x, double y){
     int x0 = (int)(floor(x));
     int x1 = (int)(ceil(x));
@@ -249,6 +341,7 @@ Vec<double,II_DIM3> CovImage::interpIIprod3(double x, double y){
     return vprod;
 }
 /* ------------------------------------------------------------ */
+
 Vec<double,FEAT_DIM1> CovImage::interpIIsum1(double x, double y){
     int x0 = (int)(floor(x));
     int x1 = (int)(ceil(x));
@@ -281,8 +374,8 @@ Vec<double,FEAT_DIM3> CovImage::interpIIsum3(double x, double y){
         + s*t*sv3;
     return vsum;
 }
-
 /* ------------------------------------------------------------ */
+
 void CovImage::covComponentMatrices(double x1, double y1, double x2, double y2,
     Mat &prodM, Mat &sumM, double &Npixels){
     int L = IIprod.channels();
@@ -334,8 +427,8 @@ void CovImage::covComponentMatrices(double x1, double y1, double x2, double y2,
             sumM = Mat(sv); // sumM should be a dim x 1 matrix
     }
 }
-
 /* ------------------------------------------------------------ */
+
 Mat CovImage::covMatrix(double x1, double y1, double x2, double y2,
     double &Npixels){
     Mat prodM, sumM, covmat;
@@ -343,7 +436,6 @@ Mat CovImage::covMatrix(double x1, double y1, double x2, double y2,
     covmat = prodM/(Npixels-1.0) - sumM*sumM.t()/(Npixels*(Npixels-1.0));
     return covmat;
 }
-
 /* ------------------------------------------------------------ */
 // crop the rectangle without interpolation 
 // void CovImage::covComponentMatrices(int x1, int y1, int x2, int y2,

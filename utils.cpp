@@ -42,7 +42,7 @@ void utils::InitPara(Parameter &para){
     para.diffratio        = reader.GetReal(para.file,"diffratio",0.1);
 
     para.framelength      = para.endFrame - para.startFrame + 1;
-    para.templateNo       = para.startFrame - 1;
+    para.templateNo       = 1;
 
     para.v9               = utils::CovmatQuadrantRef(9);
     para.v3               = utils::CovmatQuadrantRef(3);
@@ -53,8 +53,10 @@ void utils::InitPara(Parameter &para){
 
     para.previousMode     = 0;
     para.currentMode      = 0;
+ 
+    para.updateFreq       = reader.GetInteger(para.file,"updateFreq",0); 
 
-    para.updateFreq       = reader.GetInteger(para.file,"updateFreq",0);    
+    para.SearchAreaMargin = 20.0;
 
     cerr<<"Done!";
 }
