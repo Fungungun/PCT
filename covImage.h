@@ -36,7 +36,7 @@ class CovImage {
 
  public:
     /*search area*/
-    vector<double> mBoundary;
+     Mat mSearchArea;
 
     /*input image*/
     Mat im_in;    
@@ -99,8 +99,8 @@ public:
         imin_rgb2lab();
         SetSearchArea(SearchAreaMargin, tarpos);
         //cout<<tarpos<<endl;
-        //cout<<mBoundary[0]<<mBoundary[1]<<mBoundary[2]<<mBoundary[3]<<endl;
         //cout<<SearchAreaMargin<<endl;
+        //cout<<mSearchArea<<endl;
        process();
     }
 

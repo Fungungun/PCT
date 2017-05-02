@@ -26,16 +26,17 @@
      //SearchArea: x1,y1,x2,y2
      //(x1,y1) is the top left corner 
      //(x1,y2) is the bottom right corner
+     mSearchArea = tarpos.clone();
+     double *pSearchArea = mSearchArea.ptr<double>(0);
      double *ptarpos     = tarpos.ptr<double>(0);
-     mBoundary.resize(4);
 
-     mBoundary[0]      = *ptarpos - SearchAreaMargin <= 0 ? 
+     *pSearchArea       = *ptarpos - SearchAreaMargin <= 0 ? 
                             0 : (*ptarpos - SearchAreaMargin);
-     mBoundary[1]       = *(ptarpos+1) - SearchAreaMargin <= 0 ?
+     *(pSearchArea+1)   = *(ptarpos+1) - SearchAreaMargin <= 0 ?
                             0 : (*(ptarpos+1) - SearchAreaMargin);
-     mBoundary[2]     = *(ptarpos+2) + SearchAreaMargin >= nCols ?
+     *(pSearchArea+2)   = *(ptarpos+2) + SearchAreaMargin >= nCols ?
                             nCols : (*(ptarpos+2) + SearchAreaMargin);
-     mBoundary[3]    = *(ptarpos+3) + SearchAreaMargin >= nRows ?
+     *(pSearchArea+3)   = *(ptarpos+3) + SearchAreaMargin >= nRows ?
                             nRows : (*(ptarpos+3) + SearchAreaMargin);
 }
 
@@ -113,7 +114,6 @@ void CovImage::coordinateX(){
     cerr << "(nRows,nCols) = ( " << featimage.rows << "," << featimage.cols << " )\n";
     cerr << "depth =  " << featimage.depth() << ", CV_64F = " << CV_64F << "\n";
     */
-    
     for (int r=0; r < nRows; r++) {
         outptr = (double *)featimage.ptr<double>(r);
         for (int c=0; c < nCols; c++, outptr += dim){
