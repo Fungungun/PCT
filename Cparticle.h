@@ -72,8 +72,8 @@ public:
         templatePatch.resize(para.templateNo);
         for(int i = 0; i < para.templateNo ; ++i){
             cerr<<"Processing frame "<<i+1<<"  "<<filename[i]<<endl;
-            CovImage covimg_init(filename[i]);
             m_pos = pos_gt.row(i);
+            CovImage covimg_init(filename[i],para.SearchAreaMargin,m_pos);
             templatePatch[i] = covimg_init.im_in.colRange(m_pos.at<double>(0),
                                                           m_pos.at<double>(2)).rowRange(
                                                           m_pos.at<double>(1),
@@ -82,9 +82,11 @@ public:
             logm();
             m_tmplib[i].resize(para.nModes);
             for(int j = 0 ; j < para.nModes ; j++){
+               // cout<<m_logmCmat[j]<<endl;
                 m_tmplib[i][j] = m_logmCmat[j].clone();
             }
         }
+
         cerr<<"Target Created!"<<endl;
         //draw sample
         updateStddev(para);

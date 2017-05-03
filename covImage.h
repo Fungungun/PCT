@@ -36,22 +36,17 @@ class CovImage {
 
  public:
     /*search area*/
-     Mat mSearchArea;
-
+     vector<int> mSearchArea;
     /*input image*/
     Mat im_in;    
     /*image in Lab space*/
     Mat im;
-
-
     /* #channels of im */
     int nChannels;
     /* #rows of im */
     int nRows;
     /* #columns of im */
     int nCols;
-
-
     /* featimage stores the feature vectors of all the pixels. This is an
      * nRows x nCols x dim image. The components of the feature vector are: x,
      * y, I, Ix, Iy, Ixx, Iyy. Each of the last 5 components may repeat 3
@@ -96,12 +91,30 @@ public:
      */
     CovImage(string filename, float SearchAreaMargin, Mat &tarpos) {
         im_in = imread(filename, -1);
-        imin_rgb2lab();
+        imin_rgb2lab();      
         SetSearchArea(SearchAreaMargin, tarpos);
-        //cout<<tarpos<<endl;
-        //cout<<SearchAreaMargin<<endl;
-        //cout<<mSearchArea<<endl;
-       process();
+
+        /*
+        im = imread(filename,-1);
+        nChannels = im.channels();
+        nRows = im.rows;
+        nCols = im.cols;
+        dim = nChannels*5 + 2;
+//        cout<<tarpos<<endl;
+//        cout<<SearchAreaMargin<<endl;
+//        cout<<mSearchArea[0]<<" "<<mSearchArea[1]<<" "<<
+//              mSearchArea[2]<<" "<<mSearchArea[3]<<" "<<endl;
+        Mat target = im.colRange(tarpos.at<double>(0,0),tarpos.at<double>(0,2)).rowRange(
+                                 tarpos.at<double>(0,1),tarpos.at<double>(0,3));
+        Mat searchArea = im.colRange(mSearchArea[0],mSearchArea[2]).rowRange(
+                                     mSearchArea[1],mSearchArea[3]);
+        imshow("car4",im);
+        imshow("target",target);
+        imshow("searcharea",searchArea);
+        waitKey(0);
+        */
+
+        process();
     }
 
 

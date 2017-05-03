@@ -26,18 +26,17 @@
      //SearchArea: x1,y1,x2,y2
      //(x1,y1) is the top left corner 
      //(x1,y2) is the bottom right corner
-     mSearchArea = tarpos.clone();
-     double *pSearchArea = mSearchArea.ptr<double>(0);
+     mSearchArea.resize(4);
      double *ptarpos     = tarpos.ptr<double>(0);
 
-     *pSearchArea       = *ptarpos - SearchAreaMargin <= 0 ? 
-                            0 : (*ptarpos - SearchAreaMargin);
-     *(pSearchArea+1)   = *(ptarpos+1) - SearchAreaMargin <= 0 ?
-                            0 : (*(ptarpos+1) - SearchAreaMargin);
-     *(pSearchArea+2)   = *(ptarpos+2) + SearchAreaMargin >= nCols ?
-                            nCols : (*(ptarpos+2) + SearchAreaMargin);
-     *(pSearchArea+3)   = *(ptarpos+3) + SearchAreaMargin >= nRows ?
-                            nRows : (*(ptarpos+3) + SearchAreaMargin);
+     mSearchArea[0]          = *ptarpos - SearchAreaMargin <= 0 ? 
+                            0 : (int)(*ptarpos - SearchAreaMargin);
+     mSearchArea[1]         = *(ptarpos+1) - SearchAreaMargin <= 0 ?
+                            0 : (int)(*(ptarpos+1) - SearchAreaMargin);
+     mSearchArea[2]     = *(ptarpos+2) + SearchAreaMargin >= nCols ?
+                            nCols : (int)(*(ptarpos+2) + SearchAreaMargin);
+     mSearchArea[3]     = *(ptarpos+3) + SearchAreaMargin >= nRows ?
+                            nRows : (int)(*(ptarpos+3) + SearchAreaMargin);
 }
 
 /* ------------------------------------------------------------ */
@@ -78,10 +77,10 @@
         coordinateX();
         coordinateY();
 		
-// 		cerr << "coordinateX() done\n";
-// 		debug::printDoubleMat(featimage, 0);
-// 		cerr << "coordinateY() done\n";
-// 		debug::printDoubleMat(featimage, 1);
+//  		cerr << "coordinateX() done\n";
+//  		debug::printDoubleMat(featimage, 0);
+//  		cerr << "coordinateY() done\n";
+//  		debug::printDoubleMat(featimage, 1);
 				
 
         for (int c=0; c < nChannels; c++) {
@@ -249,34 +248,45 @@ void CovImage::gradient2Y(int channel){
 }
 /* ------------------------------------------------------------ */
 
-void CovImage::computeIntegralImage(){
+void CovImage::computeIntegralImage()
+{
     // initialize and compute the integral image
     int L = total(dim);
     assert(L == II_DIM1 || L == II_DIM3);
-    if (L == II_DIM1) {
+    if (L == II_DIM1) 
+    {
         IIprod = Mat_<Vec<double,II_DIM1> >(nRows+1, nCols+1);
         IIsum = Mat_<Vec<double,FEAT_DIM1> >(nRows+1, nCols+1);
     }
-    else {
+    else 
+    {
         IIprod = Mat_<Vec<double,II_DIM3> >(nRows+1, nCols+1);
         IIsum = Mat_<Vec<double,FEAT_DIM3> >(nRows+1, nCols+1);
     }
 
-    IIprod.row(0).setTo(0.0);
-    IIprod.col(0).setTo(0.0);
-    for (int r=1; r < nRows+1; r++) {
+//     IIprod.row(0).setTo(0.0);
+//     IIprod.col(0).setTo(0.0);
+    IIprod.setTo(0.0);
+    for (int r=1; r < nRows+1; r++) 
+//    for(int r = mSearchArea[1]; r < mSearchArea[3]+1; r++) 
+    {
         double *featptr, *prodptr;
         vector<double *> ptr(dim);
         featptr = (double *)featimage.ptr<double>(r-1);
         prodptr = (double *)IIprod.ptr<double>(r,1);
-        for (int c=1; c < nCols+1; c++, featptr += dim) {
+        for (int c=1; c < nCols+1; c++, featptr += dim)
+//        for(int c=mSearchArea[0]; c < mSearchArea[2]+1; c++, featptr += dim) 
+        {
             // construct IIprod
-            for (int d=0; d < dim; d++){
+            for(int d=0; d < dim; d++)
+            {
                 ptr[d] = featptr + d;
             }
-            for (int l=0, d1=0, d2=0; l < L; l++, prodptr++) {
+            for(int l=0, d1=0, d2=0; l < L; l++, prodptr++) 
+            {
                 *prodptr = (*ptr[d1]) * (*ptr[d2]);
-                if (++d2 >= dim) {
+                if (++d2 >= dim) 
+                {
                     ++d1; d2 = d1;
                 }
             }
@@ -286,9 +296,12 @@ void CovImage::computeIntegralImage(){
     /* IIsum is a copy of featimage with an extra row of 0 at the top and extra
     * columns of 0 at the left. The #extra columns = dim
     */
-    IIsum.row(0).setTo(0.0);
-    IIsum.col(0).setTo(0.0);
-    for (int r=1; r < nRows+1; r++) {
+//     IIsum.row(0).setTo(0.0);
+//     IIsum.col(0).setTo(0.0);
+    IIsum.setTo(0.0);
+    for (int r=1; r < nRows+1; r++) 
+ //   for(int r=mSearchArea[1]; r < mSearchArea[3]+1; r++) 
+    {
         double *ptr = (double *)IIsum.ptr<double>(r) + dim;
         double *inptr = (double *)featimage.ptr<double>(r-1);
         memcpy(ptr, inptr, sizeof(double)*dim*nCols);
@@ -296,11 +309,15 @@ void CovImage::computeIntegralImage(){
 
     /* now compute the cumulative sum along the rows then along the columns
     */
-    for (int r=1; r < nRows+1; r++) {
+    for (int r=1; r < nRows+1; r++) 
+  //  for(int r=mSearchArea[1]; r < mSearchArea[3]+1; r++) 
+    {
         IIprod.row(r) += IIprod.row(r-1);
         IIsum.row(r) += IIsum.row(r-1);
     }
-    for (int c=1; c < nCols+1; c++) {
+    for (int c=1; c < nCols+1; c++) 
+  //  for(int c=mSearchArea[0]; c < mSearchArea[2]+1; c++)
+    {
         IIprod.col(c) += IIprod.col(c-1);
         IIsum.col(c) += IIsum.col(c-1);
     }

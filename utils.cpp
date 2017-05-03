@@ -56,7 +56,7 @@ void utils::InitPara(Parameter &para){
  
     para.updateFreq       = reader.GetInteger(para.file,"updateFreq",0); 
 
-    para.SearchAreaMargin = 20.0;
+    para.SearchAreaMargin = 50.0;
 
     cerr<<"Done!";
 }
@@ -254,13 +254,19 @@ Mat utils::SearchParticle(CovImage &covimg, Cparticle &tarpar, Parameter &para, 
     Cparticle::par_prob = Mat::zeros(para.nParticles, para.nModes, CV_64F);
     Cparticle::sum_prob = Mat::zeros(1, para.nModes, CV_64F);
 
-    for(int j = 0; j < para.nParticles; ++j){
-        if (utils::IsParticleOutFrame(Cparticle::par_pos.row(j),covimg.im.rows,covimg.im.cols))
-           continue; 
+    for(int j = 0; j < para.nParticles; ++j)
+    {
+       // if (utils::IsParticleOutFrame(Cparticle::par_pos.row(j),covimg.im.rows,covimg.im.cols))
+       if (utils::IsParticleOutFrame(Cparticle::par_pos.row(j),covimg.mSearchArea))
+       {
+            continue; 
+       }
         Cparticle canpar(covimg,Cparticle::par_pos.row(j),para);
         canpar.ParticleProcess(tarpar,j);
     }
-
+//     cout<<Cparticle::par_dis<<endl;
+//     cout<<Cparticle::par_prob<<endl;
+//     cout<<Cparticle::sum_prob<<endl;
     Mat max_prob_index = Mat::zeros(1, para.nModes,CV_32S);
     utils::ProcessAllParticles(max_prob_index);
    
@@ -373,10 +379,23 @@ vector<vector<int>> utils::ModeQuadrantRef(int nmodes){
 
 /* ------------------------------------------------------------ */
 
-bool utils::IsParticleOutFrame(Mat single_par_pos, int height, int width){
+// bool utils::IsParticleOutFrame(Mat single_par_pos, int height, int width){
+//     double *p = single_par_pos.ptr<double>(0);
+//     if (*(p) < 0 || *(p+1) < 0 || *(p+2) > width || *(p+3) > height)
+//         return true;
+//     return false;
+// }
+bool utils::IsParticleOutFrame(Mat single_par_pos, vector<int> searcharea){
     double *p = single_par_pos.ptr<double>(0);
-    if (*(p) < 0 || *(p+1) < 0 || *(p+2) > width || *(p+3) > height)
+//     cout<<single_par_pos<<endl;
+//     cout<<searcharea[0]<<" "<<searcharea[1]<<" "<<searcharea[2]<<" "<<searcharea[3]<<endl;
+    if (*(p)  <= searcharea[0] 
+    || *(p+1) <= searcharea[1] 
+    || *(p+2) >= searcharea[2] 
+    || *(p+3) >= searcharea[3])
+    {
         return true;
+    }
     return false;
 }
 

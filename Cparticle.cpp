@@ -111,7 +111,10 @@ void Cparticle::ParticleProcess(Cparticle &tarpar,int k){
     double *pdis  = Cparticle::par_dis.ptr<double>(k);
     double *pprob = Cparticle::par_prob.ptr<double>(k);
     double *psum  = Cparticle::sum_prob.ptr<double>(0);
-    for(int i = 0; i < m_logmCmat.size() ; ++i, ++pdis, ++pprob, ++psum){
+    for(int i = 0; i < m_logmCmat.size() ; ++i, ++pdis, ++pprob, ++psum)
+    {
+//         cout<<tarpar.m_logmCmat[i]<<endl;
+//         cout<<m_logmCmat[i]<<endl;
         *pdis   = norm(m_logmCmat[i] - tarpar.m_logmCmat[i]);
         *pprob  = 1/(*pdis);
         *psum  += *pprob;
@@ -177,6 +180,9 @@ void Cparticle::ResampleParticle(Parameter &para){
     updateStddev(para);
     //sort probability
     NormProb();
+//     cout<<Cparticle::par_dis<<endl;
+//     cout<<Cparticle::par_prob<<endl;
+//     cout<<Cparticle::sum_prob<<endl;
 
     Mat current_prob = Cparticle::par_prob.col(para.currentMode).clone();
     Mat current_prob_idx;

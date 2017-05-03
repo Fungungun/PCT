@@ -58,4 +58,5 @@ int main(int argc, char** argv)
         destroyAllWindows();
     }
     //system("shutdown -h");
+    return 0;
 }

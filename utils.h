@@ -84,7 +84,8 @@ namespace utils {
     /*
     ...
      */
-    bool IsParticleOutFrame(Mat single_par_pos, int height, int width);
+    //bool IsParticleOutFrame(Mat single_par_pos, int height, int width);
+    bool IsParticleOutFrame(Mat single_par_pos, vector<int> searcharea);
     /*
     ...
      */

@@ -1,4 +1,4 @@
-clear all;clc;
+clc;clear all;
 featimage = zeros(8,9,7);
 
 featimage(:,:,1) = [
@@ -72,57 +72,116 @@ featimage(:,:,7) = [
   -92.2126  -58.4265   49.5375    4.7568   37.1239   54.9615   45.0970  -56.0248   39.4005
 ];
 
+% ------ Test integral Image ---------
+fprintf('\nTest integral Image:\n');
+k = 1;
+for i = 1:7
+   for j = i:7
+   featimgge1(:,:,k) = featimage(:,:,i) .* featimage(:,:,j);
+   IIprod(:,:,k) = integralImage(featimgge1(:,:,k));
+   k = k+1;
+   end     
+   IIsum(:,:,i) = integralImage(featimage(:,:,i));
+end
+[nRows,nCols] = size(featimage(:,:,1));
+%point  = [1 1 9 8]; % x1 y1 x2 y2 
+point  = [3 2 8 8]; % x1 y1 x2 y2 
 
-% ------ Test 1 ---------
-fprintf('\nTest 1:\n');
-G = reshape(featimage, [], 7);
+pv1 = IIprod(point(2),point(1),:);
+pv2 = IIprod(point(2),point(3)+1,:);
+pv3 = IIprod(point(4)+1,point(1),:);
+pv4 = IIprod(point(4)+1,point(3)+1,:);
+pv = pv4 + pv1 - pv2 - pv3;
 
-% the two component matrices that produce the covariance matrix
-Npixels = size(G,1)
-sumG = sum(G);
-IIprod = G'*G;
-IIsum = sumG'*sumG;
+sv1 = IIsum(point(2),point(1),:);
+sv2 = IIsum(point(2),point(3)+1,:);
+sv3 = IIsum(point(4)+1,point(1),:);
+sv4 = IIsum(point(4)+1,point(3)+1,:);
+sv = sv4 + sv1 - sv2 - sv3;
 
-% covariance matrix of G = IIprod/(Npixels-1) - IIsum/(Npixels*(Npixels-1))
-IIprod/(Npixels-1)-IIsum/(Npixels*(Npixels-1));
-disp('cov(G)=');
-disp(cov(G));
+k = 1;
+for i = 1:7
+    for j = i:7
+        prodM(i,j) = pv(k);
+        k = k+1;
+        if(j>i)
+            prodM(j,i) = prodM(i,j);
+        end
+    end
+end
 
-% ------ Test 2 ---------
-fprintf('\n\nTest 2:\n');
-x1 = 3; y1 = 2; x2 = 8; y2 = 8;
+sumM = sv(:);
+Npixels = (point(3)-point(1)+1)*(point(4)-point(2)+1);
+prodM/(Npixels-1) - sumM*sumM'/(Npixels*(Npixels-1));
+% ------ Test partial integral Image ---------
 
-subfeatimage = featimage(y1:y2, x1:x2, :);
+featimage(1,:,:) = 0;
+featimage(:,1,:) = 0;
+featimage(:,end,:) = 0;
 
-G = reshape(subfeatimage, [], 7);
+k = 1;
+for i = 1:7
+   for j = i:7
+   featimgge1(:,:,k) = featimage(:,:,i) .* featimage(:,:,j);
+   
+   featimgge1(1,:,:) = 0;
+   featimgge1(:,1,:) = 0;
+   featimgge1(:,end,:) = 0;
+   
+   IIprod(:,:,k) = integralImage(featimgge1(:,:,k));
+   k = k+1;
+   end     
+   IIsum(:,:,i) = integralImage(featimage(:,:,i));
+end
 
-% the two component matrices that produce the covariance matrix
-Npixels = size(G,1)
-sumG = sum(G);
-IIprod = G'*G;
-IIsum = sumG';
+[nRows,nCols] = size(featimage(:,:,1));
+%point  = [1 1 9 8]; % x1 y1 x2 y2 
+point  = [3 2 8 8]; % x1 y1 x2 y2 
 
-% covariance matrix of G = IIprod/(Npixels-1) - IIsum/(Npixels*(Npixels-1))
-disp('cov(G)=');
-disp(cov(G));
+pv1 = IIprod(point(2),point(1),:);
+pv2 = IIprod(point(2),point(3)+1,:);
+pv3 = IIprod(point(4)+1,point(1),:);
+pv4 = IIprod(point(4)+1,point(3)+1,:);
+pv = pv4 + pv1 - pv2 - pv3;
 
-% ======== the code below is for Test_modes.cpp ======== 
+sv1 = IIsum(point(2),point(1),:);
+sv2 = IIsum(point(2),point(3)+1,:);
+sv3 = IIsum(point(4)+1,point(1),:);
+sv4 = IIsum(point(4)+1,point(3)+1,:);
+sv = sv4 + sv1 - sv2 - sv3;
 
-% ----- mode 1 should give the same covariance matrix as Test 1 above -----
+k = 1;
+for i = 1:7
+    for j = i:7
+        prodM(i,j) = pv(k);
+        k = k+1;
+        if(j>i)
+            prodM(j,i) = prodM(i,j);
+        end
+    end
+end
 
-% ------ Test mode 2 (the top-left quadrant is missing in this mode) -------
-top_right_quadrant = featimage(1:4,6:9,:);
-bottom_half = featimage(5:end,1:end,:);
-subG = [reshape(top_right_quadrant,[],7); reshape(bottom_half,[],7)];
+sumM = sv(:);
+Npixels = (point(3)-point(1)+1)*(point(4)-point(2)+1);
+prodM/(Npixels-1) - sumM*sumM'/(Npixels*(Npixels-1));
 
-IIprod = subG'*subG;
-sumsubG = sum(subG);
-IIsum = sumsubG';
+%% test img 
+clc;
+clear all;
 
-Npixels = size(subG,1);
-disp('Covariance matrix computed from IIprod and IIsum=');
-disp(IIprod/(Npixels-1) - IIsum*IIsum'/(Npixels*(Npixels-1)));
+img = imread('gray.jpg');
+point  = [70 51 177 138];
+SearchArea = [50 31 197 158];
 
-disp('cov(subG)=');
-disp(cov(subG));
+point_rec  = [point(1) point(2) point(3)-point(1) point(4)-point(2)];
+search_rec = [SearchArea(1) SearchArea(2) SearchArea(3)-SearchArea(1) SearchArea(4)-SearchArea(2)];
+
+imshow(img);hold on
+rectangle('Position',point_rec)
+rectangle('Position',search_rec)
+
+featimage = FeatureMatrix(img);
+
+
+
 
