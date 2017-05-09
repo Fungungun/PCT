@@ -3,7 +3,7 @@
 
 #define ERROR_OUT__ std::cerr<<"[ERROR][File:"<<__FILE__<<"][Line:"<<__LINE__<<"]"
 
-#ifndef _DEBUG
+#ifndef _DEBUG00
 #define TB__(A) int64 A; A = cv::getTickCount()
 #define TE__(A) std::cout << #A << " : " << 1.E3 * double(cv::getTickCount() - A)/double(cv::getTickFrequency()) << "ms" << std::endl
 #else

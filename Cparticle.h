@@ -23,8 +23,8 @@
 
 #pragma warning(disable : 4244 4996)
 
-class Cparticle{
-
+class Cparticle
+{
 public:
     /* position of all particles*/
     static Mat par_pos;
@@ -49,7 +49,8 @@ public:
 
 public:
     /* constructor 1: candidate particles*/
-    Cparticle(CovImage &cim,Mat &pos,Parameter& para){
+    Cparticle(CovImage &cim,Mat &pos,Parameter& para)
+    {
         m_pos = pos.clone();
         calccovmat(cim,para);
         logm();  
@@ -66,28 +67,33 @@ public:
     /*this part assume that more than one frame can be used for training which is not 
         allowed. This part needs to be modified later. Currently we only use one frame
         for training. */
-    Cparticle(vector<string> filename, Parameter& para, Mat &pos_gt){
-        cerr<<"Begin creating target with first "<<para.startFrame-1<<" frames..."<<endl;
+    Cparticle(string filename, Parameter& para, Mat &pos_gt)
+    {
+        cerr<<"Creating target...";
         m_tmplib.resize(para.templateNo);
         templatePatch.resize(para.templateNo);
-        for(int i = 0; i < para.templateNo ; ++i){
-            cerr<<"Processing frame "<<i+1<<"  "<<filename[i]<<endl;
-            m_pos = pos_gt.row(i);
-            CovImage covimg_init(filename[i],para.SearchAreaMargin,m_pos);
-            templatePatch[i] = covimg_init.im_in.colRange(m_pos.at<double>(0),
-                                                          m_pos.at<double>(2)).rowRange(
-                                                          m_pos.at<double>(1),
-                                                          m_pos.at<double>(3));
-            calccovmat(covimg_init,para);
-            logm();
-            m_tmplib[i].resize(para.nModes);
-            for(int j = 0 ; j < para.nModes ; j++){
-               // cout<<m_logmCmat[j]<<endl;
-                m_tmplib[i][j] = m_logmCmat[j].clone();
-            }
+        //construct target
+        m_pos = pos_gt.row(0);
+        CovImage covimg_init(filename,m_pos);
+        calccovmat(covimg_init,para);
+        logm();
+        //cout<<m_logmCmat[0]<<endl;
+
+        //save image patch and template model
+        //currently only one template
+        templatePatch[0] = 
+            covimg_init.im_in.colRange(m_pos.at<double>(0),
+            m_pos.at<double>(2)).rowRange(
+            m_pos.at<double>(1),
+            m_pos.at<double>(3));
+        m_tmplib[0].resize(para.nModes);
+        for(int j = 0 ; j < para.nModes ; j++){
+            // cout<<m_logmCmat[j]<<endl;
+            m_tmplib[0][j] = m_logmCmat[j].clone();
         }
 
-        cerr<<"Target Created!"<<endl;
+        cerr<<"Done!"<<endl;
+
         //draw sample
         updateStddev(para);
         GenParticlePostion(para);

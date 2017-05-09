@@ -19,7 +19,6 @@ struct Parameter{
     double std_y;
     double std_gain_w;
     double std_gain_h;
-    double diffratio;
     /***************************************/
     int framelength;
     /***************************************/
@@ -34,8 +33,6 @@ struct Parameter{
     int currentMode;
     /***************************************/
     int updateFreq;
-    /***************************************/
-    float SearchAreaMargin;
 
 };
 #endif

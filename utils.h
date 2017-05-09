@@ -6,7 +6,8 @@
 #include "SParater.h"
 #include "cpp/INIReader.h"
 
-namespace utils {
+namespace utils
+{
 
     /*
     .....
